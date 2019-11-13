@@ -136,7 +136,7 @@ get_latitude_longitude = function(CHLV95_E, CHLV95_N){
   a_5 = 0.00096
   lambda = 2.67825 + a_1*Y + a_3*(Y^3) + a_5*(Y^5)
   
-  # then compoute an intermediate value (phi) for the latitude (unit: 10000 seconds (i.e. 10000''))
+  # then compute an intermediate value (phi) for the latitude (unit: 10000 seconds (i.e. 10000''))
   p_0 = 3.23864877 * X - 0.0025486 * (X^2) - 0.013245 * (X^3) + 0.000048 * (X^4)
   p_2 = - 0.27135379 - 0.0450442 * X - 0.007553 * (X^2) - 0.00146 * (X^3)
   p_4 = 0.002442 + 0.00132 * X
