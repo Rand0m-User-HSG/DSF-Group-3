@@ -243,3 +243,64 @@ df <- merged %>%
 
 save(df, file = "Data/tidy_dataset")
 
+
+### Let's get a dataset to regress on.
+### We want to know the number of accident in the city of Zürich in a given day!
+
+df_reg <- df %>% 
+  dplyr::select(CantonCode, AccidentYear, AccidentMonth, week_day, week_day_number, days, AccidentHour, Temp,
+                Dewpoint, Pressure, `Relative-Humidity`, `Wind-Spd`, `Prec-Amount`)
+
+df_reg <- na.omit(df_reg)
+df_reg <- df_reg[-which(df_reg$Pressure == 9999.9), ]
+df_reg <- df_reg[-which(df_reg$`Prec-Amount` == 999.9), ]
+
+df_reg <- df_reg %>% 
+  mutate(date = sprintf("%s%s%s", days, AccidentMonth, AccidentYear))
+
+df_reg_zh <- df_reg[which(df_reg$CantonCode == "ZH"),]
+
+sum_acc <- as_tibble(df_reg_zh[1,])
+sum_acc <- sum_acc %>% 
+  mutate(number_accidents = 1)
+
+df_reg_zh <- df_reg_zh %>% 
+  mutate(number_accidents = 1)
+
+j <- 1
+k <- rep(1, length(unique(df_reg_zh$date)))
+
+for (i in 2:nrow(df_reg_zh)){
+  
+  if (df_reg_zh$date[i] == df_reg_zh$date[i-1]){
+    
+    sum_acc$number_accidents[j] <- sum_acc$number_accidents[j] + 1
+    sum_acc$Temp[j] <- sum_acc$Temp[j] + df_reg_zh$Temp[i]
+    sum_acc$Dewpoint[j] <- sum_acc$Dewpoint[j] + df_reg_zh$Dewpoint[i]
+    sum_acc$Pressure[j] <- sum_acc$Pressure[j] + df_reg_zh$Pressure[i]
+    sum_acc$`Relative-Humidity`[j] <- sum_acc$`Relative-Humidity`[j] + df_reg_zh$`Relative-Humidity`[i]
+    sum_acc$`Wind-Spd`[j] <- sum_acc$`Wind-Spd`[j] + df_reg_zh$`Wind-Spd`[i]
+    sum_acc$`Prec-Amount`[j] <- sum_acc$`Prec-Amount`[j] + df_reg_zh$`Prec-Amount`[i]
+    k[j] <- k[j] + 1
+      
+  } else{
+    
+    sum_acc <- rbind(sum_acc, df_reg_zh[i,])
+    j = j + 1
+    
+  }
+}
+
+for (i in 1:length(k)){
+  sum_acc$Temp[i] <- sum_acc$Temp[i]/k[i]
+  sum_acc$Pressure[i] <- sum_acc$Pressure[i]/k[i]
+  sum_acc$Dewpoint[i] <- sum_acc$Dewpoint[i]/k[i]
+  sum_acc$`Relative-Humidity`[i] <- sum_acc$`Relative-Humidity`[i]/k[i]
+  sum_acc$`Wind-Spd`[i] <- sum_acc$`Wind-Spd`[i]/k[i]
+  sum_acc$`Prec-Amount`[i] <- sum_acc$`Prec-Amount`[i]/k[i]
+  
+}
+
+df_reg <- sum_acc
+
+save(df_reg, file = "Data/data_reg")
