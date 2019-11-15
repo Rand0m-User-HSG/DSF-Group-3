@@ -8,7 +8,7 @@ library(tidyverse)
 
 accidents <- read.csv("./Data/RoadTrafficAccidentLocations.csv")
 
-accidents <- accident %>% 
+accidents <- accidents %>% 
   select(-AccidentType_de, -AccidentType_fr, -AccidentType_it,
          -RoadType_de, -RoadType_fr, -RoadType_it,
          -AccidentSeverityCategory_de, -AccidentSeverityCategory_fr, -AccidentSeverityCategory_it,
@@ -18,7 +18,7 @@ accidents <- accident %>%
 # now for the wheater files
 
 wheater1 <- read.csv("./Data/9159828051199dat.txt", skip = 2) # sadly the column names are a weird combination of the first and second line, so we have to hard code them
-names <- c("Name", "USAF", "NCDC ", "Date", "HrMn", "I", "Type", "QCP", "Temp", "Q1", "Dewpoint", "Q2", "Pressure", "Q3", "Relative-Humidity", "Null")
+names <- c("Name", "USAF", "NCDC ", "Date", "HrMn", "I", "Type", "QCP", "Temp", "Q1", "Dewpoint", "Q2", "Pressure", "Q3", "Relative_Humidity", "Null")
 names(wheater1) <- names
 
 # The colums denoted with an I or Q are just non-relevant quality and type indicator, we drop them togheter with 
@@ -28,25 +28,25 @@ wheater1 <- wheater1 %>%
   select(- `NCDC `  , -Type, -I, -Q1, -Q2, -Q3, -QCP, -Null)
 
 wheater2 <- read.csv("./Data/938008051210dat.txt", skip = 2)
-names2 <- c("Name", "USAF", "NCDC", "Date", "HrMn", "I", "Type",  "QCP",  "Wind-Dir", "Q1", "I2", "Wind-Spd", "Q2", "Height of clouds", "Q3", "I3", "I4", "Visible distance",  "Q4", "I5", "Q6", "Null")
+names2 <- c("Name", "USAF", "NCDC", "Date", "HrMn", "I", "Type",  "QCP",  "Wind_Dir", "Q1", "I2", "Wind_Spd", "Q2", "Height_of_clouds", "Q3", "I3", "I4", "Visible_distance",  "Q4", "I5", "Q6", "Null")
 names(wheater2) <- names2
 
 wheater2 <- wheater2 %>%
-  select(Name, USAF, Date, HrMn, `Wind-Dir`, `Wind-Spd`, `Height of clouds`, `Visible distance`)
+  select(Name, USAF, Date, HrMn, Wind_Spd, Height_of_clouds, Visible_distance)
 
 wheater3 <- read.csv("./Data/5555778051215dat.txt", skip = 2)
-names3 <- c("Name", "USAF", "NCDC", "Date", "HrMn", "I", "Type", "QCP", "Period", "Prec-Amount", "I2", "Q", "Period2", "Prec-Amount2", "I3", "Q2", "Period3", "Prec-Amount3", "I4", "Q3", "Period4", "Prec-Amount4", "I5", "Q4", "Null")
+names3 <- c("Name", "USAF", "NCDC", "Date", "HrMn", "I", "Type", "QCP", "Period", "Prec_Amount", "I2", "Q", "Period2", "Prec_Amount2", "I3", "Q2", "Period3", "Prec_Amount3", "I4", "Q3", "Period4", "Prec_Amount4", "I5", "Q4", "Null")
 names(wheater3) <- names3
 
 wheater3 <- wheater3 %>% 
-  select(Name, USAF, Date, HrMn, `Prec-Amount`)
+  select(Name, USAF, Date, HrMn, Prec_Amount)
 
 wheater4 <- read.csv("./Data/7670498051219dat.txt", skip = 2)
-names4 <- c("Name", "USAF", "NCDC","Date", "HrMn", "I", "Type", "QCP", "Period", "Snow-Amount", "I2", "Q", "Pr", "Amt", "I3", "Q2", "Pr2", "Amt2", "I4", "Q3", "Pr3", "Amt3", "I5", "Q4", "Null")
+names4 <- c("Name", "USAF", "NCDC","Date", "HrMn", "I", "Type", "QCP", "Period", "Snow_Amount", "I2", "Q", "Pr", "Amt", "I3", "Q2", "Pr2", "Amt2", "I4", "Q3", "Pr3", "Amt3", "I5", "Q4", "Null")
 names(wheater4) <- names4
 
 wheater4 <- wheater4 %>% 
-  select(Name, USAF, Date, HrMn, `Snow-Amount`)
+  select(Name, USAF, Date, HrMn, Snow_Amount)
 
 wheater_stations <- read.csv("./Data/9159828051199stn.txt", sep = "") # This is a dataset of all the stations, it'll be useful since it contains the spatial coordinates of the stations
 
@@ -64,7 +64,7 @@ wheater1234 <- merge(wheater123, wheater4, by = c("Name", "USAF", "Date", "HrMn"
 wheater_final <- merge(wheater1234, wheater_stations, by = "USAF", all.x = T)
 
 names(wheater_final)
-sum(is.na(wheater_final$LAT)) # all stations have been found
+sum(is.na(wheater_final$USAF)) # all stations have been found
 
 
 # we now have 2 datasets with (hopefully) enough info for a model
@@ -237,23 +237,47 @@ df <- merged %>%
   dplyr::select(AccidentSeverityCategory, AccidentSeverityCategory_en, fatalties, severe_injuries, light_injuries,
           AccidentInvolvingPedestrian, AccidentInvolvingBicycle, AccidentInvolvingMotorcycle, RoadType_en, road_type,
           CantonCode, Canton, AccidentYear, AccidentMonth, week_day, week_day_number, days, AccidentHour, Temp, Dewpoint, Pressure,
-          `Relative-Humidity`,`Wind-Dir`, `Wind-Spd`, `Prec-Amount`)
+          Relative_Humidity, Wind_Spd, Prec_Amount)
 
-# There're also some NA in Prec-Amount, but for now we keep them for visualization
+# There're also some NA in Prec_Amount, but we want to keep them for visualization
+# more problematic are the "NAs" introduced by the website from which we took the data: They're a bunch of "9", 
+# so they would disrupt he data visualization
 
-save(df, file = "Data/tidy_dataset")
+df <- df[which(df$Prec_Amount != 999.9&df$Pressure != 9999.9),]
 
+df_vis <- df
+save(df_vis, file = "Data/data_vis.RData")
+
+# now let's make a cleaner dataset for modeling
+
+df_class <- na.omit(df)
+
+save(df_class, file = "Data/data_class.RData")
 
 ### Let's get a dataset to regress on.
-### We want to know the number of accident in the city of Zürich in a given day!
+### We want to know the number of accidents in the canton ZH in a given day!
+
+rm(list=ls())
+
+load("./Data/tidy_dataset")
+wheater_zh <- read.csv("./Data/meteo_zh.txt", skip = 2, sep = "")
+
+colnames(wheater_zh) <- c("station", "date", "Pressure", "Temp", "Humidity", "Prec1", "Prec2", "Prec_total")
+
+wheater_zh <- wheater_zh[which(wheater_zh$date >= "20110101" & wheater_zh$date < 20190101),]
+
+wheater_zh <- wheater_zh %>% 
+  mutate("AccidentYear" = as.integer(str_sub(wheater_zh$date, 1, 4))) %>% 
+  mutate("AccidentMonth" = as.integer(str_sub(wheater_zh$date, 5, 6))) %>% 
+  mutate("days" = as.integer(str_sub(wheater_zh$date, 7, 8)))
+
+wheater_zh <- wheater_zh %>%
+  mutate("Prec_amount" = as.double(Prec1) + as.double(Prec2)) %>% 
+  dplyr::select(AccidentYear, AccidentMonth, days, Temp, Pressure, Humidity, Prec_amount)
+
 
 df_reg <- df %>% 
-  dplyr::select(CantonCode, AccidentYear, AccidentMonth, week_day, week_day_number, days, AccidentHour, Temp,
-                Dewpoint, Pressure, `Relative-Humidity`, `Wind-Spd`, `Prec-Amount`)
-
-df_reg <- na.omit(df_reg)
-df_reg <- df_reg[-which(df_reg$Pressure == 9999.9), ]
-df_reg <- df_reg[-which(df_reg$`Prec-Amount` == 999.9), ]
+  dplyr::select(CantonCode, AccidentYear, AccidentMonth, week_day, week_day_number, days)
 
 df_reg <- df_reg %>% 
   mutate(date = sprintf("%s%s%s", days, AccidentMonth, AccidentYear))
@@ -268,21 +292,13 @@ df_reg_zh <- df_reg_zh %>%
   mutate(number_accidents = 1)
 
 j <- 1
-k <- rep(1, length(unique(df_reg_zh$date)))
 
 for (i in 2:nrow(df_reg_zh)){
   
   if (df_reg_zh$date[i] == df_reg_zh$date[i-1]){
     
     sum_acc$number_accidents[j] <- sum_acc$number_accidents[j] + 1
-    sum_acc$Temp[j] <- sum_acc$Temp[j] + df_reg_zh$Temp[i]
-    sum_acc$Dewpoint[j] <- sum_acc$Dewpoint[j] + df_reg_zh$Dewpoint[i]
-    sum_acc$Pressure[j] <- sum_acc$Pressure[j] + df_reg_zh$Pressure[i]
-    sum_acc$`Relative-Humidity`[j] <- sum_acc$`Relative-Humidity`[j] + df_reg_zh$`Relative-Humidity`[i]
-    sum_acc$`Wind-Spd`[j] <- sum_acc$`Wind-Spd`[j] + df_reg_zh$`Wind-Spd`[i]
-    sum_acc$`Prec-Amount`[j] <- sum_acc$`Prec-Amount`[j] + df_reg_zh$`Prec-Amount`[i]
-    k[j] <- k[j] + 1
-      
+    
   } else{
     
     sum_acc <- rbind(sum_acc, df_reg_zh[i,])
@@ -291,16 +307,34 @@ for (i in 2:nrow(df_reg_zh)){
   }
 }
 
-for (i in 1:length(k)){
-  sum_acc$Temp[i] <- sum_acc$Temp[i]/k[i]
-  sum_acc$Pressure[i] <- sum_acc$Pressure[i]/k[i]
-  sum_acc$Dewpoint[i] <- sum_acc$Dewpoint[i]/k[i]
-  sum_acc$`Relative-Humidity`[i] <- sum_acc$`Relative-Humidity`[i]/k[i]
-  sum_acc$`Wind-Spd`[i] <- sum_acc$`Wind-Spd`[i]/k[i]
-  sum_acc$`Prec-Amount`[i] <- sum_acc$`Prec-Amount`[i]/k[i]
+df_reg_zh <- sum_acc
+
+df_reg <- merge(wheater_zh, df_reg_zh, by = c("AccidentYear", "AccidentMonth", "days"), all.x = T)
+
+df_reg <- df_reg %>% 
+  dplyr::select(CantonCode, AccidentYear, AccidentMonth, days, week_day_number, Temp, Pressure, Humidity, Prec_amount, number_accidents)
+
+df_reg$CantonCode[is.na(df_reg$CantonCode)] <- "ZH"
+df_reg$number_accidents[is.na(df_reg$number_accidents)] <- 0
+
+for (i in 1:nrow(df_reg)){
   
+  if (is.na(df_reg$week_day_number[i]) == T){
+    df_reg$week_day_number[i] <- df_reg$week_day_number[i-1] + 1
+  }
 }
 
-df_reg <- sum_acc
+# we also want the wind-speed
 
-save(df_reg, file = "Data/data_reg")
+zh_wind <- read.csv("./Data/wind_zh.txt", skip = 2)
+colnames(zh_wind) <- c("Name", "USAF", "NCDC", "Date", "HrMn", "I", "Type", "QCP", "Dir", "Q", "I2", "Wind_Spd", "Q2", "Null")
+zh_wind <- zh_wind %>% 
+  dplyr::select(Date, Wind_Spd)
+
+zh_wind <- zh_wind %>% 
+  mutate("AccidentYear" = as.integer(str_sub(zh_wind$Date, 1, 4))) %>% 
+  mutate("AccidentMonth" = as.integer(str_sub(zh_wind$Date, 5, 6))) %>% 
+  mutate("days" = as.integer(str_sub(zh_wind$Date, 7, 8))) %>% 
+  dplyr::select(-Date)
+
+save(df_reg, file = "Data/data_reg.RData")
