@@ -337,4 +337,6 @@ zh_wind <- zh_wind %>%
   mutate("days" = as.integer(str_sub(zh_wind$Date, 7, 8))) %>% 
   dplyr::select(-Date)
 
+df_reg <- merge(df_reg, zh_wind, by = c("AccidentYear", "AccidentMonth", "days"))
+
 save(df_reg, file = "Data/data_reg.RData")
