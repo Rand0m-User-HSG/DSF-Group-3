@@ -107,9 +107,9 @@ accidents <- accidents %>%
 accidents <- subset(accidents, select = c(1:8, road_type, 9:17))
 
 accidents <- accidents %>% 
-  mutate("fatalties" = ifelse(AccidentSeverityCategory == "as3", 1, 0)) %>% 
+  mutate("fatalties" = ifelse(AccidentSeverityCategory == "as1", 1, 0)) %>% 
   mutate("severe_injuries" = ifelse(AccidentSeverityCategory == "as2", 1, 0)) %>% 
-  mutate("light_injuries" = ifelse(AccidentSeverityCategory == "as1", 1, 0)) %>% 
+  mutate("light_injuries" = ifelse(AccidentSeverityCategory == "as3", 1, 0)) %>% 
   subset(select = c(1:4, fatalties, severe_injuries, light_injuries, 5:18))
 
 accidents <- accidents %>% 
