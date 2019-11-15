@@ -331,6 +331,28 @@ colnames(zh_wind) <- c("Name", "USAF", "NCDC", "Date", "HrMn", "I", "Type", "QCP
 zh_wind <- zh_wind %>% 
   dplyr::select(Date, Wind_Spd)
 
+sum_wind <- as_tibble(zh_wind[1,])
+j <- 1
+k <- rep(0, length(unique(zh_wind$Date)))
+
+for (i in 2:nrow(zh_wind)){
+  
+  if (zh_wind$Date[i] == zh_wind$Date[i-1]){
+    
+    sum_wind$Wind_Spd[j] <- sum_wind$Wind_Spd[j] + zh_wind$Wind_Spd[i]
+    k[j] <- k[j] + 1
+    
+  } else {
+    
+    j = j + 1
+    sum_wind[j,] <- zh_wind[i,]
+  }
+}
+
+sum_wind$Wind_Spd <- sum_wind$Wind_Spd/k
+
+zh_wind <- sum_wind
+
 zh_wind <- zh_wind %>% 
   mutate("AccidentYear" = as.integer(str_sub(zh_wind$Date, 1, 4))) %>% 
   mutate("AccidentMonth" = as.integer(str_sub(zh_wind$Date, 5, 6))) %>% 
