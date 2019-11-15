@@ -361,4 +361,10 @@ zh_wind <- zh_wind %>%
 
 df_reg <- merge(df_reg, zh_wind, by = c("AccidentYear", "AccidentMonth", "days"))
 
+df_reg$Temp <- as.double(df_reg$Temp)
+df_reg$Pressure <- as.double(df_reg$Pressure)
+df_reg$Humidity <- as.double(df_reg$Humidity)
+df_reg$Prec_amount <- as.double(df_reg$Prec_amount)
+df_reg$Wind_Spd <- as.double(df_reg$Wind_Spd)
+
 save(df_reg, file = "Data/data_reg.RData")
