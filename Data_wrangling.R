@@ -250,7 +250,7 @@ save(df_vis, file = "Data/data_vis.RData")
 
 # now let's make a cleaner dataset for modeling
 
-df_class <- na.omit(df)
+df_class <- na.omit(df_vis)
 
 save(df_class, file = "Data/data_class.RData")
 
