@@ -21,13 +21,25 @@ load("./Data/data_class.RData") # this dataset is loaded as df_class
 df_class = df_class[which(df_class$Prec_Amount != 999.9 & df_class$Pressure != 9999.9),]
 
 # then we create the Y_vector
-n_fatalities = sum(df_class$fatalties) # degree 1
-n_severe_injuries = sum(df_class$severe_injuries) # degree 2
-n_light_injuries = sum(df_class$light_injuries) # degree 3
+df_class = df_class %>% 
+  mutate(Y_vector = rep(0, nrow(df_class)))
 
-Y_vector = c(rep(1,n_fatalities), rep(2, n_severe_injuries), rep(3, n_light_injuries))
+for(i in 1:nrow(df_class)){
+  if(df_class$AccidentSeverityCategory[i] == "as1"){
+    df_class$Y_vector[i] = 1
+  }
+  if(df_class$AccidentSeverityCategory[i] == "as2"){
+    df_class$Y_vector[i] = 2
+  }
+  if(df_class$AccidentSeverityCategory[i] == "as3"){
+    df_class$Y_vector[i] = 3
+  }
+}
+
+Y_vector = df_class$Y_vector
 
 save(Y_vector, file = "Data/Y_vector_classification.RData")
+
 
 #### X_matrix ####
 # we now create the X_matrix of covariates
