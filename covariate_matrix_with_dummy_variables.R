@@ -138,3 +138,5 @@ X_matrix = X_matrix[which(X_matrix$Prec_Amount != 999.9 & X_matrix$Pressure != 9
 
 # finally we convert the X_matrix (currently a dataframe) into a matrix
 X_matrix = data.matrix(X_matrix)
+
+save(X_matrix, file = "Data/covariate_matrix.RData")
