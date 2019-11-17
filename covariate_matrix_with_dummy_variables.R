@@ -46,7 +46,7 @@ save(Y_vector, file = "Data/Y_vector_classification.RData")
 
 # we first drop the target columns (Y)
 X_matrix = df_class %>%
-  dplyr::select(-c(AccidentSeverityCategory, AccidentSeverityCategory_en, Y_vector))
+  dplyr::select(-c(fatalties, severe_injuries, light_injuries, AccidentSeverityCategory, AccidentSeverityCategory_en, Y_vector))
 
 # we then convert the true/false values of 3 columns into dummy variables (1 or 0)
 # these columns are AccidentInvolvingPedestrian, AccidentInvolvingBicycle, AccidentInvolvingMotorcycle
@@ -63,7 +63,7 @@ X_matrix = X_matrix %>%
          Motorway_side_installation = ifelse(road_type == 4, 1, 0),
          Other = ifelse(road_type == 5, 1, 0),
          Principal_road = ifelse(road_type == 6, 1, 0)) %>%
-  dplyr::select(1:6, 23:28, 9:22)
+  dplyr::select(1:3, 20:25, 6:19)
 
 # we then convert the canton codes into dummy variables (1 or 0)
 X_matrix = X_matrix %>%
@@ -93,7 +93,7 @@ X_matrix = X_matrix %>%
          VS = ifelse(Canton == 24, 1, 0),
          ZG = ifelse(Canton == 25, 1, 0),
          ZH = ifelse(Canton == 26, 1, 0)) %>%
-  dplyr::select(1:12, 27:52, 15:26)
+  dplyr::select(1:9, 24:49, 12:23)
 
 # we then drop the AccidentYear column, because it would not lend itself to future-oriented predictions
 # i.e. it would not be suitable if we were to use this model in the future, on another dataset
@@ -114,7 +114,7 @@ X_matrix = X_matrix %>%
          October = ifelse(AccidentMonth == 10, 1, 0),
          November = ifelse(AccidentMonth == 11, 1, 0),
          December = ifelse(AccidentMonth == 12, 1, 0)) %>%
-  dplyr::select(1:38, 50:61, 40:49)
+  dplyr::select(1:35, 47:58, 37:46)
 
 # we then convert the weekdays into dummy variables (1 or 0)
 X_matrix = X_matrix %>%
@@ -125,7 +125,7 @@ X_matrix = X_matrix %>%
          Friday = ifelse(week_day_number == 5, 1, 0),
          Saturday = ifelse(week_day_number == 6, 1, 0),
          Sunday = ifelse(week_day_number == 7, 1, 0)) %>%
-  dplyr::select(1:50, 61:67, 53:60)
+  dplyr::select(1:47, 58:64, 50:57)
 
 # we then drop the column days, because it is not relevant for our predictions
 # indeed what matter is the month and the weekday, but not the day number in the month
@@ -158,7 +158,7 @@ X_matrix = X_matrix %>%
          Hour21 = ifelse(AccidentHour == 21, 1, 0),
          Hour22 = ifelse(AccidentHour == 22, 1, 0),
          Hour23 = ifelse(AccidentHour == 23, 1, 0)) %>%
-  dplyr::select(1:57, 65:88, 59:64)
+  dplyr::select(1:54, 62:85, 56:61)
 
 # finally we convert the X_matrix (currently a dataframe) into a real matrix
 X_matrix = data.matrix(X_matrix)
