@@ -239,7 +239,7 @@ df <- merged %>%
           CantonCode, Canton, AccidentYear, AccidentMonth, week_day, week_day_number, days, AccidentHour, Temp, Dewpoint, Pressure,
           Relative_Humidity, Wind_Spd, Prec_Amount)
 
-save(df, file = "tidy_dataset.RData")
+save(df, file = "Data/tidy_dataset.RData")
 # There're also some NA in Prec_Amount, but we want to keep them for visualization
 # more problematic are the "NAs" introduced by the website from which we took the data: They're a bunch of "9", 
 # so they would disrupt he data visualization
