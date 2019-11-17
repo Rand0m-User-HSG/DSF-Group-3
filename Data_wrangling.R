@@ -243,15 +243,13 @@ df <- merged %>%
 # more problematic are the "NAs" introduced by the website from which we took the data: They're a bunch of "9", 
 # so they would disrupt he data visualization
 
-df <- df[which(df$Prec_Amount != 999.9&df$Pressure != 9999.9),]
-save(df, file= "Data/tidy_dataset.RData")
+df_vis <- df[which(df$Prec_Amount != 999.9&df$Pressure != 9999.9),]
 
-df_vis <- df
 save(df_vis, file = "Data/data_vis.RData")
 
 # now let's make a cleaner dataset for modeling
 
-df_class <- na.omit(df)
+df_class <- na.omit(df_vis)
 
 save(df_class, file = "Data/data_class.RData")
 
@@ -260,7 +258,6 @@ save(df_class, file = "Data/data_class.RData")
 
 rm(list=ls())
 
-load("./Data/tidy_dataset")
 wheater_zh <- read.csv("./Data/meteo_zh.txt", skip = 2, sep = "")
 
 colnames(wheater_zh) <- c("station", "date", "Pressure", "Temp", "Humidity", "Prec1", "Prec2", "Prec_total")
@@ -276,8 +273,9 @@ wheater_zh <- wheater_zh %>%
   mutate("Prec_amount" = as.double(Prec1) + as.double(Prec2)) %>% 
   dplyr::select(AccidentYear, AccidentMonth, days, Temp, Pressure, Humidity, Prec_amount)
 
+load("./Data/df_vis.RData")
 
-df_reg <- df %>% 
+df_reg <- df_vis %>% 
   dplyr::select(CantonCode, AccidentYear, AccidentMonth, week_day, week_day_number, days)
 
 df_reg <- df_reg %>% 
