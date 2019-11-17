@@ -27,6 +27,7 @@ n_light_injuries = sum(df_class$light_injuries) # degree 3
 
 Y_vector = c(rep(1,n_fatalities), rep(2, n_severe_injuries), rep(3, n_light_injuries))
 
+save(Y_vector, file = "Data/Y_vector_classification.RData")
 
 #### X_matrix ####
 # we now create the X_matrix of covariates
