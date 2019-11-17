@@ -1,5 +1,5 @@
 #### Introduction ####
-# In this script we create a covariate matrix specifically for classication tasks
+# In this script we create a dataset specifically for classication tasks
 # The idea is to convert all categorical variables (e.g. road type, canton) into dummy variables (1 or 0)
 # In doing so we avoid weigthing problems
 # e.g. we avoid that the model gives too much weight to the variable "CantonCode" simply because this variable ranges from 1 to 26
@@ -10,11 +10,26 @@ library(tidyverse)
 
 
 # we load the dataset for classification tasks that was produced in Data_wrangling.R
-load("./Data/data_class.RData")
+load("./Data/data_class.RData") # this dataset is loaded as df_class
+
+
+#### Y_vector ####
+# we first create the Y_vector with the 3 degrees of accident severity (i.e. 3 classes)
+
+# we start by omitting observations where Pressure = 9999.9 or Prec_Amount = 999.9
+# because they correspond to NA values
+df_class = df_class[which(df_class$Prec_Amount != 999.9 & df_class$Pressure != 9999.9),]
+
+# then we create the Y_vector
+n_fatalities = sum(df_class$fatalties) # degree 1
+n_severe_injuries = sum(df_class$severe_injuries) # degree 2
+n_light_injuries = sum(df_class$light_injuries) # degree 3
+
+Y_vector = c(rep(1,n_fatalities), rep(2, n_severe_injuries), rep(3, n_light_injuries))
 
 
 #### X_matrix ####
-# we create the X_matrix of covariates
+# we now create the X_matrix of covariates
 
 # we first drop the target columns (Y)
 X_matrix = df_class %>%
@@ -132,11 +147,7 @@ X_matrix = X_matrix %>%
          Hour23 = ifelse(AccidentHour == 23, 1, 0)) %>%
   dplyr::select(1:57, 65:88, 59:64)
 
-# then we omit observations where Pressure = 9999.9 or Prec_Amount = 999.9
-# because they correspond to NA values
-X_matrix = X_matrix[which(X_matrix$Prec_Amount != 999.9 & X_matrix$Pressure != 9999.9),]
-
-# finally we convert the X_matrix (currently a dataframe) into a matrix
+# finally we convert the X_matrix (currently a dataframe) into a real matrix
 X_matrix = data.matrix(X_matrix)
 
 save(X_matrix, file = "Data/covariate_matrix.RData")
