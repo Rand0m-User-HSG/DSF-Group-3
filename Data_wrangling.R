@@ -239,6 +239,7 @@ df <- merged %>%
           CantonCode, Canton, AccidentYear, AccidentMonth, week_day, week_day_number, days, AccidentHour, Temp, Dewpoint, Pressure,
           Relative_Humidity, Wind_Spd, Prec_Amount)
 
+save(df, file = "tidy_dataset.RData")
 # There're also some NA in Prec_Amount, but we want to keep them for visualization
 # more problematic are the "NAs" introduced by the website from which we took the data: They're a bunch of "9", 
 # so they would disrupt he data visualization
@@ -249,7 +250,7 @@ save(df_vis, file = "Data/data_vis.RData")
 
 # now let's make a cleaner dataset for modeling
 
-df_class <- na.omit(df_vis)
+df_class <- na.omit(df)
 
 save(df_class, file = "Data/data_class.RData")
 
@@ -273,9 +274,9 @@ wheater_zh <- wheater_zh %>%
   mutate("Prec_amount" = as.double(Prec1) + as.double(Prec2)) %>% 
   dplyr::select(AccidentYear, AccidentMonth, days, Temp, Pressure, Humidity, Prec_amount)
 
-load("./Data/df_vis.RData")
+load("./Data/tidy_dataset.RData")
 
-df_reg <- df_vis %>% 
+df_reg <- df %>%  
   dplyr::select(CantonCode, AccidentYear, AccidentMonth, week_day, week_day_number, days)
 
 df_reg <- df_reg %>% 
