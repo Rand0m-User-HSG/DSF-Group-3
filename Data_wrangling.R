@@ -244,6 +244,7 @@ df <- merged %>%
 # so they would disrupt he data visualization
 
 df <- df[which(df$Prec_Amount != 999.9&df$Pressure != 9999.9),]
+save(df, file= "Data/tidy_dataset.RData")
 
 df_vis <- df
 save(df_vis, file = "Data/data_vis.RData")
