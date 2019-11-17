@@ -46,7 +46,7 @@ save(Y_vector, file = "Data/Y_vector_classification.RData")
 
 # we first drop the target columns (Y)
 X_matrix = df_class %>%
-  dplyr::select(-c(AccidentSeverityCategory, AccidentSeverityCategory_en))
+  dplyr::select(-c(AccidentSeverityCategory, AccidentSeverityCategory_en, Y_vector))
 
 # we then convert the true/false values of 3 columns into dummy variables (1 or 0)
 # these columns are AccidentInvolvingPedestrian, AccidentInvolvingBicycle, AccidentInvolvingMotorcycle
