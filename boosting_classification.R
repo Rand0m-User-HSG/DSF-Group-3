@@ -40,9 +40,11 @@ library(gbm)
 
 #gbm requires a data frame and not a matrix
 X_df <- data.frame(X_matrix)
+Y_df <- data.frame(X_matrix)
 
 #Randomly shuffle the data
 X_df = X_df[sample(nrow(X_df)),]
+Y_vector = Y_df[sample(nrow(Y_df)),]
 
 ##-------Cross valation with k = 10 folds ------------------------
 #I try to perform the model with this one and when I get it I will try to do it with leave-one-out
@@ -50,8 +52,9 @@ X_df = X_df[sample(nrow(X_df)),]
 
 #Create 10 equally size folds
 folds = cut(seq(1,nrow(X_df)),breaks=10,labels=FALSE)
+folds_y = cut(seq(1,nrow (Y_df)),breaks=10,labels=FALSE)
 
-#Perform 10 fold cross validation
+#Perform 10 folds cross validation
 for(i in 1:10){
   #Segement your data by fold using the which() function
   testIndexes <- which(folds==i,arr.ind=TRUE)
@@ -59,12 +62,19 @@ for(i in 1:10){
   trainData <- X_df[-testIndexes, ]
 }
 
-model_fit_train <- gbm(Y_vector~., data = trainData, distribution = "multinomial", 
-                 n.trees = 500, interaction.depth = 4)
+for(i in 1:10){
+  #Segement your data by fold using the which() function
+  Yindexes <- which(folds_y==i,arr.ind=TRUE)
+  Ytest<- Y_df[Yindexes, ]
+  Ytrain <- Y_df[-Yindexes, ]
+}
 
-#here I get the error message: 
-############Error in model.frame.default(formula = Y_vector ~ ., data = trainData,  : 
-##les longueurs des variables diffèrent (trouvé pour 'AccidentInvolvingPedestrian')
+model_fit_train <- gbm(Ytrain ~., data = trainData, distribution = "multinomial", 
+                 n.trees = 100, interaction.depth = 4)
+
+#here is the new error message I get: Error in model.frame.default(formula = Ytrain ~ ., 
+#data = trainData, drop.unused.levels = TRUE,  : 
+#type (list) incorrect pour la variable 'Ytrain'
 
 
 #If I try to do it for X_matrix, without separating the training and testing data, I get
