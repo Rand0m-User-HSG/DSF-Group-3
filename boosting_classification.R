@@ -56,14 +56,12 @@ folds_y = cut(seq(1,nrow (Y_df)),breaks=10,labels=FALSE)
 
 #Perform 10 folds cross validation
 for(i in 1:10){
-  #Segement your data by fold using the which() function
   testIndexes <- which(folds==i,arr.ind=TRUE)
   testData <- X_df[testIndexes, ]
   trainData <- X_df[-testIndexes, ]
 }
 
 for(i in 1:10){
-  #Segement your data by fold using the which() function
   Yindexes <- which(folds_y==i,arr.ind=TRUE)
   Ytest<- Y_df[Yindexes, ]
   Ytrain <- Y_df[-Yindexes, ]
