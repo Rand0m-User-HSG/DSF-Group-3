@@ -35,8 +35,10 @@ for (i in 1:k) {
   y_classified[(1+(i-1)*nrow(X_matrix)/k):(i*nrow(X_matrix)/k)] <- pred
   error_cv[i] = mean(abs(yn_test - as.integer(pred)))
 }
+#Until here everything works!
 
-# Attempt on using optim function 
+
+## Attempt on using optim function 
 xn_test = as.matrix(xn_test)
 Empirical_error_function = function(y_classified) {
   length(which( cbind(rep(1,5429), xn) %*% y_classified < 1)) +
@@ -49,7 +51,7 @@ result = optim_result$par
 #not working but should look something like that 
 
 
-##Confusion matrix 1
+## Confusion matrix 1
 # this is for the last loop only
 num_degrees = 3
 # we have to add this line, otherwise R doesn't know which value to take because there were initially three values: 1,2,3 and 
@@ -62,7 +64,7 @@ for (i in 1:num_degrees) {
 }
 # the ouput is a bit strange. 
 
-##Confusion matrix 2: a bit complicated but the ouput gives interesting info (even if it was not was I wanted as output) 
+## Confusion matrix 2: a bit complicated but the ouput gives interesting info (even if it was not was I wanted as output) 
 misclassification_matrix = matrix(NA, num_degrees, num_degrees)
 
 for (i in 1:num_degrees) {
