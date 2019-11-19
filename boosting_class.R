@@ -36,6 +36,19 @@ for (i in 1:k) {
   error_cv[i] = mean(abs(yn_test - as.integer(pred)))
 }
 
+# Attempt on using optim function 
+xn_test = as.matrix(xn_test)
+Empirical_error_function = function(y_classified) {
+  length(which( cbind(rep(1,5429), xn) %*% y_classified < 1)) +
+    length(which(cbind(rep(1,5429), xn)  %*% y_classified >=2))
+}
+
+optim_result = optim(par=rep(0,3), Empirical_error_function , method="SANN")
+result = optim_result$par
+
+#not working but should look something like that 
+
+
 ##Confusion matrix 1
 # this is for the last loop only
 num_degrees = 3
