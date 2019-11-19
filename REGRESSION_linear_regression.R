@@ -41,17 +41,18 @@ MAE_regression = mean(abs(Y_vector - Y_forecasted))
 fold = 10
 sum_of_10_fold_cv_MSEs = 0
 sum_of_10_fold_cv_MAEs = 0
-x_i = matrix(0, nrow = 0, ncol = ncol(X_matrix))
-y_i = rep(0, 0)
 
 for (i in 1:fold){
   
-  x_i = X_matrix[(nrow(x_i)+1):(round(nrow(X_matrix)/fold*i)), ]
-  y_i = Y_vector[(length(y_i)+1):(round(length(Y_vector)/fold*i))]
+  lower_bound_i = (i-1)*(round(nrow(X_matrix)/fold))+1
+  upper_bound_i = round(nrow(X_matrix)/fold*i)
+  
+  x_i = X_matrix[(lower_bound_i:upper_bound_i), ]
+  y_i = Y_vector[lower_bound_i:upper_bound_i]
   # the X_matrix and Y_vector of fold i (i.e. 1/10 of X_matrix and Y_vector)
   
-  x_non_i = X_matrix[-((nrow(x_i)+1):(round(nrow(X_matrix)/fold*i))), ]
-  y_non_i = Y_vector[-((length(y_i)+1):(round(length(Y_vector)/fold*i)))]
+  x_non_i = X_matrix[-(lower_bound_i:upper_bound_i), ]
+  y_non_i = Y_vector[-(lower_bound_i:upper_bound_i)]
   # the X_matrix and Y_vector of everything that is not fold i (i.e. 9/10 of X_matrix and Y_vector)
   
   beta = solve((t(x_non_i) %*% x_non_i), (t(x_non_i)%*%y_non_i))
@@ -66,5 +67,5 @@ for (i in 1:fold){
 MSE_10_fold_cv = sum_of_10_fold_cv_MSEs / fold
 MAE_10_fold_cv = sum_of_10_fold_cv_MAEs / fold
 
-# MSE_10_fold_cv = 8.939184 (MSE_regression  = 9.362053)
-# MAE_10_fold_cv = 2.338491 (MAE_regression = 2.376562)
+# MSE_10_fold_cv = 9.671956 (MSE_regression  = 9.362053)
+# MAE_10_fold_cv = 2.413695 (MAE_regression = 2.376562)
