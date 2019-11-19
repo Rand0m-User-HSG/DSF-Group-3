@@ -69,3 +69,6 @@ MAE_10_fold_cv = sum_of_10_fold_cv_MAEs / fold
 
 # MSE_10_fold_cv = 9.671956 (MSE_regression  = 9.362053)
 # MAE_10_fold_cv = 2.413695 (MAE_regression = 2.376562)
+
+# Getting slightly higher cv errors is normal, because they correspond to "testing" errors
+# unlike the errors from the previous section which were merely "training" errors
