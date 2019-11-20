@@ -1,4 +1,4 @@
----##GBM##---
+----##GBM##---
   
 rm(list =ls())
 
@@ -17,25 +17,25 @@ sum_of_10_fold_cv_MSEs = 0
 sum_of_10_fold_cv_MAEs = 0
 
 pred = matrix(NA, nrow = nrow(X_matrix)/k, ncol = k)
-yn_forecasted_i <- rep(NA, length(Y_vector))
+yn_forecasted =  rep(NA, length(Y_vector))
 
 for (i in 1:k) {
   
   
-  yn_i = Y_vector[-((1+(i-1)*nrow(X_matrix)/k):(i*nrow(X_matrix)/k))]
-  xn_i = data.frame(X_matrix[-((1+(i-1)*nrow(X_matrix)/k):(i*nrow(X_matrix)/k)),])
-  xn_test_i = data.frame(X_matrix[(1+(i-1)*nrow(X_matrix)/k):(i*nrow(X_matrix)/k),])
-  yn_test_i = Y_vector[(1+(i-1)*nrow(X_matrix)/k):(i*nrow(X_matrix)/k)]
+  yn = Y_vector[-((1+(i-1)*nrow(X_matrix)/k):(i*nrow(X_matrix)/k))]
+  xn = data.frame(X_matrix[-((1+(i-1)*nrow(X_matrix)/k):(i*nrow(X_matrix)/k)),])
+  xn_test = data.frame(X_matrix[(1+(i-1)*nrow(X_matrix)/k):(i*nrow(X_matrix)/k),])
+  yn_test = Y_vector[(1+(i-1)*nrow(X_matrix)/k):(i*nrow(X_matrix)/k)]
   
-  model_gbm = gbm(yn_i ~., data = xn_i ,distribution = "gaussian",cv.folds = 10,
-                  shrinkage = .01,n.minobsinnode = 10,n.trees = 500)
+  model_gbm = gbm(yn  ~., data = xn  ,distribution = "gaussian",cv.folds = 10,
+                  shrinkage = .01, n.minobsinnode = 10,n.trees = 500)
   
-  pred = predict.gbm(model_gbm, xn_test_i,type = "link")
+  pred = predict.gbm(model_gbm, xn_test ,type = "link")
   
 
-  yn_forecasted_i[(1+(i-1)*nrow(X_matrix)/k):(i*nrow(X_matrix)/k)] <- pred
-  sum_of_10_fold_cv_MSEs = sum_of_10_fold_cv_MSEs + sum((Y_vector - yn_forecasted_i)^2, na.rm = T)  / (length(Y_vector))
-  sum_of_10_fold_cv_MAEs = sum_of_10_fold_cv_MAEs + mean(abs(Y_vector - yn_forecasted_i), na.rm = T)
+  yn_forecasted[(1+(i-1)*nrow(X_matrix)/k):(i*nrow(X_matrix)/k)] <- pred
+  sum_of_10_fold_cv_MSEs = sum_of_10_fold_cv_MSEs + sum((Y_vector - yn_forecasted)^2, na.rm = T)  / (length(Y_vector))
+  sum_of_10_fold_cv_MAEs = sum_of_10_fold_cv_MAEs + mean(abs(Y_vector - yn_forecasted), na.rm = T)
 
 }
 
