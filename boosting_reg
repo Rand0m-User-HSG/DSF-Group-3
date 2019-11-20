@@ -1,5 +1,7 @@
----##GBM##---
+##GBM##
   
+--------------##Introduction##-------------
+
 # In this script we perform a generalized a boosted regresion model 
 # The goal is to predict the number of accidents in canton ZH on a particular day
 # We test our results by performing 10-fold cross-validation
@@ -24,11 +26,13 @@ load("./Data/covariate_matrix_reg.RData") # the name of this matrix is X_matrix
 # we load the Y_vector that was produced in REGRESSION_covariate_matrix_with_dummy_variables.R
 load("./Data/Y_vector_regression.RData") # the name of this vector is Y_vector
 
-# Generalized boosted regression model 
 
+--------------##Generalized boosted regression model##-------------
 #gbm requires data frames
-X_matrix <- data.frame(X_matrix)
 
+pred = matrix(NA, nrow = nrow(X_matrix)/k, ncol = k)
+yn_forecasted =  rep(NA, length(Y_vector))
+X_matrix <- data.frame(X_matrix)
 
 model_gbm = gbm(Y_vector  ~., data = X_matrix  ,distribution = "gaussian",cv.folds = 10,
                 shrinkage = .01, n.minobsinnode = 10,n.trees = 500)
@@ -43,10 +47,11 @@ sum_of_10_fold_cv_MAEs = sum_of_10_fold_cv_MAEs + mean(abs(Y_vector - yn_forecas
 # MAE_regression = 2.47698
 
 
-#### 10-fold cross-validation ####
+--------------##10-folds cross-validation##-------------
+
 k = 10
-sum_of_10_fold_cv_MSEs = 0
-sum_of_10_fold_cv_MAEs = 0
+error_MSE = 0
+error_MAE = 0
 
 pred = matrix(NA, nrow = nrow(X_matrix)/k, ncol = k)
 yn_forecasted =  rep(NA, length(Y_vector))
@@ -65,13 +70,16 @@ for (i in 1:k) {
   pred = predict.gbm(model_gbm, xn_test ,type = "link")
   
   yn_forecasted[(1+(i-1)*nrow(X_matrix)/k):(i*nrow(X_matrix)/k)] <- pred
-  sum_of_10_fold_cv_MSEs = sum_of_10_fold_cv_MSEs + sum((Y_vector - yn_forecasted)^2, na.rm = T)  / (length(Y_vector))
-  sum_of_10_fold_cv_MAEs = sum_of_10_fold_cv_MAEs + mean(abs(Y_vector - yn_forecasted), na.rm = T)
+  sum_of_10_fold_cv_MSEs = error_MSE + sum((Y_vector - yn_forecasted)^2, na.rm = T)  / (length(Y_vector))
+  sum_of_10_fold_cv_MAEs = error_MAE + mean(abs(Y_vector - yn_forecasted), na.rm = T)
   # we use xn_test and yn_test to do the prodiction on fold i
-}
+  }
+
+# sum_of_10_fold_cv_MSEs = 10.23737 (MSE_regression = 9.987382)
+# sum_of_10_fold_cv_MAEs = 2.509269 (MAE_regression = 2.47698)
 
 MSE_10_fold_cv = sum_of_10_fold_cv_MSEs / k
 MAE_10_fold_cv = sum_of_10_fold_cv_MAEs / k
 
-# MSE_10_fold_cv = 1.024888 (MSE_regression = 9.987382)
-# MAE_10_fold_cv = 0.2511079 (MAE_regression = 2.47698)
+# MSE_10_fold_cv = 1.024888
+# MAE_10_fold_cv = 0.2511079
