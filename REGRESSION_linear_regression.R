@@ -72,3 +72,40 @@ MAE_10_fold_cv = sum_of_10_fold_cv_MAEs / fold
 
 # Getting slightly higher cv errors is normal, because they correspond to "testing" errors
 # unlike the errors from the previous section which were merely "training" errors
+
+
+#### Leave-one-out cross-validation ####
+
+# in this section we perform a linear regression
+# and carry out a leave-one-out (LOO) cross-validation
+
+sum_of_LOO_cv_MSEs = 0
+sum_of_LOO_cv_MAEs = 0
+
+for (i in 1:nrow(X_matrix)){
+  
+  x_i = X_matrix[i, ]
+  y_i = Y_vector[i]
+  # the X_matrix and Y_vector associated to i (i.e. 1 row of X_matrix and Y_vector)
+  
+  x_non_i = X_matrix[-i, ]
+  y_non_i = Y_vector[-i]
+  # the X_matrix and Y_vector of everything that is not i (i.e. all other rows of X_matrix and Y_vector)
+  
+  beta = solve((t(x_non_i) %*% x_non_i), (t(x_non_i)%*%y_non_i))
+  
+  y_i_forecasted = x_i %*% beta
+  sum_of_LOO_cv_MSEs = sum_of_LOO_cv_MSEs + (y_i - y_i_forecasted)^2
+  sum_of_LOO_cv_MAEs = sum_of_LOO_cv_MAEs + abs(y_i - y_i_forecasted)
+  # we use x_non_i and y_non_i to calculate beta, and test this beta on x_i and y_i
+  
+}
+
+MSE_LOO_cv = sum_of_LOO_cv_MSEs / nrow(X_matrix)
+MAE_LOO_cv = sum_of_LOO_cv_MAEs / nrow(X_matrix)
+
+# MSE_LOO_cv = 9.514341 (MSE_10_fold_cv = 9.671956; MSE_regression  = 9.362053)
+# MAE_LOO_cv = 2.395989 (MAE_10_fold_cv = 2.413695; MAE_regression = 2.376562)
+
+# Getting slightly lower leave-one-out cv errors compared to 10-fold cv is normal, because
+# leave-one-out cv provides for a more refined model (we get 2897 iterations, not just 10)
