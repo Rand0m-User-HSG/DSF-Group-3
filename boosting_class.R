@@ -63,19 +63,3 @@ for (i in 1:num_degrees) {
   }
 }
 # the ouput is a bit strange. 
-
-## Confusion matrix 2: a bit complicated but the ouput gives interesting info (even if it was not was I wanted as output) 
-misclassification_matrix = matrix(NA, num_degrees, num_degrees)
-
-for (i in 1:num_degrees) {
-  for (j in 1:num_degrees) {
-    misclassification_matrix = confusionMatrix(
-      factor(y_classified, levels = 1:3),
-      factor(Y_vector, levels = 1:3), positive = NULL,
-      dnn = c("Prediction", "Reference"), prevalence = NULL,
-       mode = "sens_spec")
-  }
-}
-misclassification_matrix = as.matrix(misclassification_matrix, what = "classes")
-print(misclassification_matrix, 
-      mode = x$mode, digits = max(3, getOption("digits") - 3), printStats = TRUE)
