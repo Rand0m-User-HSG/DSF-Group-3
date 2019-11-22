@@ -140,6 +140,18 @@ X_matrix = X_matrix %>%
          Hour23 = ifelse(AccidentHour == 23, 1, 0)) %>%
   dplyr::select(1:54, 62:85, 56:61)
 
+
+# we then standardize the last six columns (Temp, DewPoint, Pressure, Relative_Humidity, Wind_Spd, Prec_Amount)
+
+standFun = function(x){ #standFun is a function that standardizes -> mean = 0, sd = 1
+  out = (x - mean(x))/sd(x)
+  return(out)
+}
+
+for(i in 79:84){
+  X_matrix[, i] = standFun(X_matrix[, i])
+}
+
 # finally we convert the X_matrix (currently a dataframe) into a real matrix
 X_matrix = data.matrix(X_matrix)
 
