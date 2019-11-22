@@ -69,6 +69,18 @@ X_matrix = X_matrix %>%
 X_matrix = X_matrix %>% 
   dplyr::select(-CantonCode)
 
+
+# we then standardize the last 5 columns (Temp, Pressure, Humidity, Prec_Amount, Wind_Spd)
+
+standFun = function(x){ #standFun is a function that standardizes -> mean = 0, sd = 1
+  out = (x - mean(x))/sd(x)
+  return(out)
+}
+
+for(i in 20:24){
+  X_matrix[, i] = standFun(X_matrix[, i])
+}
+
 # finally we convert the X_matrix (currently a dataframe) into a real matrix
 X_matrix = data.matrix(X_matrix)
 
