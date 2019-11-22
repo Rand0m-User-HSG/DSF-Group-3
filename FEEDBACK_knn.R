@@ -86,9 +86,9 @@ TypeII_errors_KNN_severe_injuries_cv = rep(0, fold)
 TypeI_errors_KNN_fatalities_cv = rep(0, fold)
 TypeII_errors_KNN_fatalities_cv = rep(0, fold)
 
-labels_light_injuries_cv = rep(0, fold)
-labels_severe_injuries_cv = rep(0, fold)
-labels_fatalities_cv = rep(0, fold)
+labels_light_injuries_cv = matrix(0, nrow=fold, ncol = nrow(light_injuries_sample_x)/fold+1)
+labels_severe_injuries_cv = matrix(0, nrow=fold, ncol = nrow(severe_injuries_sample_x)/fold+1)
+labels_fatalities_cv = matrix(0, nrow=fold, ncol = nrow(fatalities_sample_x)/fold+1)
 
 for(i in 1:fold){
   
@@ -96,25 +96,27 @@ for(i in 1:fold){
   upper_bound_i = round(nrow(X_matrix)/fold*i)
   
   total_sample_x_i = Total_sample_x[(lower_bound_i:upper_bound_i), ]
-  light_injuries_sample_x_i = light_injuries_sample_x[(lower_bound_i:upper_bound_i), ]
-  severe_injuries_sample_x_i = severe_injuries_sample_x[(lower_bound_i:upper_bound_i), ]
-  fatalities_sample_x_i = fatalities_sample_x[(lower_bound_i:upper_bound_i), ]
+  light_injuries_sample_x_i = light_injuries_sample_x[((i-1)*(round(nrow(light_injuries_sample_x)/fold))+1):(round(nrow(light_injuries_sample_x)/fold*i)), ]
+  severe_injuries_sample_x_i = severe_injuries_sample_x[((i-1)*(round(nrow(severe_injuries_sample_x)/fold))+1):(round(nrow(severe_injuries_sample_x)/fold*i)), ]
+  fatalities_sample_x_i = fatalities_sample_x[((i-1)*(round(nrow(fatalities_sample_x)/fold))+1):(round(nrow(fatalities_sample_x)/fold*i)), ]
   Y_light_injuries_i = Y_light_injuries[lower_bound_i:upper_bound_i]
   Y_severe_injuries_i = Y_severe_injuries[lower_bound_i:upper_bound_i]
   Y_fatalities_i = Y_fatalities[lower_bound_i:upper_bound_i]
   # the X_matrices and Y_vectors of fold i (i.e. 1/10 of the corresponding X_matrices and Y_vectors)
   
-  labels_light_injuries_cv[i] = knn(total_sample_x_i, light_injuries_sample_x_i, Y_light_injuries_i, k = 5,prob=TRUE)
-  labels_severe_injuries_cv[i] = knn(total_sample_x_i, severe_injuries_sample_x_i, Y_severe_injuries_i, k = 5,prob=TRUE)
-  labels_fatalities_cv[i] = knn(total_sample_x_i, fatalities_sample_x_i, Y_fatalities_i, k = 5, prob = TRUE)
+  labels_light_injuries_cv[i, 1:nrow(light_injuries_sample_x_i)] = t(as.data.frame(as.numeric(as.character(knn(total_sample_x_i, light_injuries_sample_x_i, Y_light_injuries_i, k = 5,prob=TRUE)))))
+  labels_severe_injuries_cv[i, 1:nrow(severe_injuries_sample_x_i)] = t(as.data.frame(as.numeric(as.character(knn(total_sample_x_i, severe_injuries_sample_x_i, Y_severe_injuries_i, k = 5,prob=TRUE)))))
+  labels_fatalities_cv[i, 1:nrow(fatalities_sample_x_i)] = t(as.data.frame(as.numeric(as.character(knn(total_sample_x_i, fatalities_sample_x_i, Y_fatalities_i, k = 5, prob = TRUE)))))
   
-  TypeI_errors_KNN_light_injuries_cv[i] = sum(as.numeric(as.character(labels_light_injuries_cv[i])))
-  TypeII_errors_KNN_light_injuries_cv[i] = length(which(as.numeric(as.character(labels_light_injuries_cv[i])) == 0))
-  TypeI_errors_KNN_severe_injuries_cv[i] = sum(as.numeric(as.character(labels_severe_injuries_cv[i])))
-  TypeII_errors_KNN_severe_injuries_cv[i] = length(which(as.numeric(as.character(labels_severe_injuries_cv[i])) == 0))
-  TypeI_errors_KNN_fatalities_cv[i] = sum(as.numeric(as.character(labels_fatalities_cv[i])))
-  TypeII_errors_KNN_fatalities_cv[i] = length(which(as.numeric(as.character(labels_fatalities_cv[i])) == 0))
+  TypeI_errors_KNN_light_injuries_cv[i] = sum(labels_light_injuries_cv[i, ])
+  TypeII_errors_KNN_light_injuries_cv[i] = length(which(labels_light_injuries_cv[i, ] == 0))
+  TypeI_errors_KNN_severe_injuries_cv[i] = sum(labels_severe_injuries_cv[i, ])
+  TypeII_errors_KNN_severe_injuries_cv[i] = length(which(labels_severe_injuries_cv[i, ] == 0))
+  TypeI_errors_KNN_fatalities_cv[i] = sum(labels_fatalities_cv[i, ])
+  TypeII_errors_KNN_fatalities_cv[i] = length(which(labels_fatalities_cv[i, ] == 0))
   
 }
 
-Empirical_error_KNN_cv = (mean(TypeI_errors_KNN_light_injuries_cv) + mean(TypeII_errors_KNN_light_injuries_cv) + mean(TypeI_errors_KNN_severe_injuries_cv) + mean(TypeII_errors_KNN_severe_injuries_cv) + mean(TypeI_errors_KNN_fatalities_cv) + mean(TypeII_errors_KNN_fatalities_cv)) / (3*n)
+Empirical_error_KNN_cv = (mean(TypeI_errors_KNN_light_injuries_cv) + mean(TypeII_errors_KNN_light_injuries_cv) + mean(TypeI_errors_KNN_severe_injuries_cv) + mean(TypeII_errors_KNN_severe_injuries_cv) + mean(TypeI_errors_KNN_fatalities_cv) + mean(TypeII_errors_KNN_fatalities_cv)) / (3*n/fold)
+
+# Empirical_error_KNN_cv = 0.3334561
