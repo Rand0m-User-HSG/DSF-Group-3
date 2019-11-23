@@ -231,6 +231,12 @@ merged <- inner_join(accidents, wheater_final, by = c("Name", "AccidentYear", "A
 
 names(merged)
 
+# we now save the merged dataset under another name ("accidents_location_visualisation")
+# in order to be able to use the location information (latitude & longitude)
+# in the script preliminary_data_visualisation.R
+save(merged, file = "Data/accidents_location_visualisation.RData")
+
+
 # Many variables are useless for modelling and sadly, some variables are mostly NA, so we drop them
 
 df <- merged %>% 
