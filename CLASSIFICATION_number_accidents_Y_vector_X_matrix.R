@@ -29,36 +29,36 @@ save(X_matrix, file = "Data/X_matrix_classification_number_accidents.RData")
 
 # we observe that the values of Y_vector are contained in the range [0, 26]
 min(Y_vector) # min(Y_vector) = 0
-max (Y_vector) # max (Y_vector) = 0
+max (Y_vector) # max (Y_vector) = 26
 
 # thus we divide this range into 9 classes of 3
 for(i in 1:length(Y_vector)){
   if(Y_vector[i] >=0 & Y_vector[i] <= 2){
-    Y_vector[i] = 0 # class 1 gets the value 0
+    Y_vector[i] = 1 # class 1 gets the value 1
   }
   if(Y_vector[i] >=3 & Y_vector[i] <= 5){
-    Y_vector[i] = 1 
-  }
-  if(Y_vector[i] >=6 & Y_vector[i] <= 8){
     Y_vector[i] = 2 
   }
-  if(Y_vector[i] >=9 & Y_vector[i] <= 11){
+  if(Y_vector[i] >=6 & Y_vector[i] <= 8){
     Y_vector[i] = 3 
   }
-  if(Y_vector[i] >=12 & Y_vector[i] <= 14){
+  if(Y_vector[i] >=9 & Y_vector[i] <= 11){
     Y_vector[i] = 4 
   }
-  if(Y_vector[i] >=15 & Y_vector[i] <= 17){
+  if(Y_vector[i] >=12 & Y_vector[i] <= 14){
     Y_vector[i] = 5 
   }
-  if(Y_vector[i] >=18 & Y_vector[i] <= 20){
+  if(Y_vector[i] >=15 & Y_vector[i] <= 17){
     Y_vector[i] = 6 
   }
-  if(Y_vector[i] >=21 & Y_vector[i] <= 23){
+  if(Y_vector[i] >=18 & Y_vector[i] <= 20){
     Y_vector[i] = 7 
   }
-  if(Y_vector[i] >=24 & Y_vector[i] <= 26){
+  if(Y_vector[i] >=21 & Y_vector[i] <= 23){
     Y_vector[i] = 8 
+  }
+  if(Y_vector[i] >=24 & Y_vector[i] <= 26){
+    Y_vector[i] = 9 
   }
 }
 
