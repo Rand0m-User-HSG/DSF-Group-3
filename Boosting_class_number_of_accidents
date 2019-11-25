@@ -1,0 +1,82 @@
+##Maboost##
+
+--------------##Introduction##-------------
+
+# In this script we perform a logistic regression for a classication task
+# The goal is to predict the degree of severity of an accident
+# There are 3 dgrees of severity: light injuries, severe injuries, fatalities
+# We perdorm a multiclass classificaiton with help of boosting
+
+rm(list =ls())
+
+#maboost package is the extension of adaboost package for multiclass classification
+#install.packages("maboost")
+#install.packages("caret")
+library(rpart)
+library(C50)
+library(maboost)
+library(lattice)
+library(tidyverse)
+library(caret)
+
+load("./Data/X_matrix_classification_number_accidents.RData")
+load("./Data/Y_vector_classification_number_accidents.RData")
+
+--------------##Boosted multicass classification##-------------
+
+num_classes = 9
+n = dim(X_matrix)[1]
+p = dim(X_matrix)[2]
+pred = matrix(NA, nrow = nrow(X_matrix), ncol = 1)
+y_classified = rep(NA, length(Y_vector))
+X_matrix = data.frame(X_matrix)
+
+model_maboost = maboost(X_matrix, Y_vector, iter = 5, nu = .1, C50tree = T, C5.0Control(CF = .2, minCase = 128))
+
+pred = predict(model_maboost,X_matrix,type="class")
+
+y_classified =  pred
+
+Empirical_error = length(which(y_classified != Y_vector)) / n
+
+# Empirical_error = 0.5909562
+
+
+--------------##10-folds cross-validation##-------------
+
+k = 10
+num_classes = 9
+Empirical_error_cv = rep(NA, k)
+pred = matrix(NA, nrow = nrow(X_matrix)/k, ncol = k)
+y_classified_cv = rep(NA, length(Y_vector))
+X_matrix = data.frame(X_matrix)
+
+for (i in 1:k) {
+  
+  yn = Y_vector[-((1+(i-1)*nrow(X_matrix)/k):(i*nrow(X_matrix)/k))]
+  xn = X_matrix[-((1+(i-1)*nrow(X_matrix)/k):(i*nrow(X_matrix)/k)),]
+  xn_test = data.frame(X_matrix[(1+(i-1)*nrow(X_matrix)/k):(i*nrow(X_matrix)/k),])
+  yn_test = Y_vector[(1+(i-1)*nrow(X_matrix)/k):(i*nrow(X_matrix)/k)]
+  
+  model_maboost = maboost(x = xn, y = yn, iter = 5, nu = .1, C50tree = T, C5.0Control(CF = .2, minCase = 128))
+  
+  pred = predict(model_maboost,xn_test,type="class");
+  
+  y_classified_cv[(1+(i-1)*nrow(X_matrix)/k):(i*nrow(X_matrix)/k)] <- pred
+  
+  Empirical_error_cv = length(which(y_classified_cv != Y_vector)) / n
+}
+
+# Empirical_error_cv = 0.6838108
+
+--------------##Misclassification matrix##-------------
+#The code is based on the script of JPO, Day 4Exercise4_Handwriting_recognition.R 
+
+
+misclassification_matrix_cv = matrix(0,num_classes, num_classes)
+for (i in 1:num_classes) {
+  for (j in 1:num_classes) {
+    misclassification_matrix_cv[i, j] = length(which((Y_vector == i) & (y_classified_cv == j))) / length(which((Y_vector == i)))
+  }
+}
+  
