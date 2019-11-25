@@ -85,3 +85,43 @@ MAE_10_fold_cv = sum_of_10_fold_cv_MAEs / k
 
 # MSE_10_fold_cv = 1.024888
 # MAE_10_fold_cv = 0.2511079
+
+--------------##Leave-one-out cross-validation##-------------
+
+k = nrow(X_matrix) #perhaps -1
+sum_of_LOO_cv_MSEs = 0 
+sum_of_LOO_cv_MAEs = 0 
+
+yn_forecasted =  rep(NA, length(Y_vector)/k) 
+
+for (i in 1:k) {
+  
+  
+  yn = Y_vector[-((1+(i-1)*nrow(X_matrix)/k):(i*nrow(X_matrix)/k))]
+  xn = data.frame(X_matrix[-((1+(i-1)*nrow(X_matrix)/k):(i*nrow(X_matrix)/k)),])
+  xn_test = data.frame(X_matrix[(1+(i-1)*nrow(X_matrix)/k):(i*nrow(X_matrix)/k),])
+  yn_test = Y_vector[(1+(i-1)*nrow(X_matrix)/k):(i*nrow(X_matrix)/k)]
+  
+  model_gbm = gbm(yn  ~., data = xn  ,distribution = "gaussian",cv.folds = k,
+                  shrinkage = .01, n.minobsinnode = 10, n.trees = 500)
+  
+  pred = predict.gbm(model_gbm, xn_test ,type = "link")
+  
+  yn_forecasted <- pred
+  sum_of_LOO_cv_MSEs = sum_of_LOO_cv_MSEs + sum((yn_test - yn_forecasted)^2, na.rm = T)  / (length(yn_test)) 
+  
+  sum_of_LOO_cv_MAEs = sum_of_LOO_cv_MAEs + mean(abs(yn_test - yn_forecasted), na.rm = T)
+  # we use xn_test and yn_test to do the prediction on fold i
+}
+
+
+MSE_LOO_cv = sum_of_LOO_cv_MSEs / k
+MAE_LOO_cv = sum_of_LOO_cv_MSEs / k
+
+# MSE_LOO_cv = 10.26497 
+# MAE_LOO_cv = 2.509592
+
+# Comparison to the errors without cross-validation
+# MSE = 9.98923 
+# MAE = 2.475934 
+
