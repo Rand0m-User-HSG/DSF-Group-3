@@ -51,7 +51,7 @@ result = optim_result$par
 #not working but should look something like that 
 
 
-## Confusion matrix 1
+## Confusion matrix 
 # this is for the last loop only
 num_degrees = 3
 # we have to add this line, otherwise R doesn't know which value to take because there were initially three values: 1,2,3 and 
