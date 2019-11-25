@@ -61,5 +61,4 @@ for (i in 1:num_degrees) {
   for (j in 1:num_degrees) {
     misclassification_matrix[i, j] = length(which((Y_vector == i) & (y_classified == j))) / length(which((Y_vector == i)))
   }
-}
-# the ouput is a bit strange. 
+} 
