@@ -1,0 +1,54 @@
+--------------##10-folds cross-validation with optimization##-------------
+install.packages("doParallel")
+library(doParallel)
+library(gbm)
+
+
+# Parallel computation
+cl = makeCluster(4)
+#registerDoSNOW(cl)
+registerDoParallel(cl)
+
+
+
+optim_boosting <- function(i, X, Y){
+  fold = 2
+
+  y_forecasted <- rep(NA, length(Y_vector))
+
+  for (i in 1:fold){
+    
+    X_matrix <- data.frame(X_matrix)
+    
+    X_k <- X_matrix[(1 + (i-1)*nrow(X)/fold):(i*(nrow(X)/fold)),]
+    Y_k <- Y_vector[(1 + (i-1)*nrow(X_matrix)/fold):(i*(nrow(X)/fold))]
+    X_test <- X_matrix[-((1 + (i-1)*nrow(X)/fold) : (i*(nrow(X)/fold))),]
+    Y_test <- Y_vector[-((1 + (i-1)*nrow(X)/fold) : (i*(nrow(X)/fold)))]
+    
+    
+    model_gbm = gbm(Y_k  ~., data = X_k  ,distribution = "gaussian",cv.folds = 10,
+                    shrinkage = .01, n.minobsinnode = 10, n.trees = i, interaction.depth = 2)
+   
+    y_forecasted[(1+(i-1)*nrow(X_matrix)/k):(i*nrow(X_matrix)/k)] <- pred
+    
+    cv_error[i] <- mean(abs(Y_test - y_forecasted))
+    
+  }
+  
+  errors <- mean(cv_error)
+  return(errors)
+}
+
+
+possible_n.trees <- 101:102
+error <- rep(NA, length(possible_n.trees))
+
+for (i in possible_n.trees){
+  error[i-100] <- optim_boosting(i, X_matrix, Y_vector)
+}
+
+#at this point I get the error:  Error in rowSums(cv.error) : 
+  'x' must be an array of at least two dimensions 
+
+k_best <- which(error == min(error))
+print(k_best)
