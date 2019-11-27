@@ -2,7 +2,6 @@
 # In this script we will apply KNN classification. 
 # We want to classifiy the amount of accidents happening on one day.
 # Beforehand we cleaned the data into three categories: 
-# Accident with light injuries (as3), Accident with severe injuries	(as2), Accident with fatalities	(as1).
 
 rm(list=ls())
 library(tidyverse)
