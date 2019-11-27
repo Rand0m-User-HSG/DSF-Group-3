@@ -31,3 +31,6 @@ mod_cv$lambda.1se
 
 
 
+#Now we want the betas
+beta=coef(mod_cv)
+print(beta)
