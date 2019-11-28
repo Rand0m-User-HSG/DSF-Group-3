@@ -1,4 +1,14 @@
-rm(list = ls())
+rm(list= ls())
+
+# DISCLAIMER: In order to train these models, you'll need to be able to use keras 
+# in a python IDE (this means you also need TensorFlow), that is, 
+# you also need to (pip) install these packages in python!
+# Here is a link to a page in which they explain how to do it: 
+# https://towardsdatascience.com/setup-an-environment-for-machine-learning-and-deep-learning-with-anaconda-in-windows-5d7134a3db10
+# However, nearing the end of these script, we trained a CNN and saved the weights, so that
+# even if you aren't able to run the models to get the predictions and the errors, we can get them with 
+# highschool-level linear algebra!
+
 #install.packages("tensor")
 #install.packages("keras")
 #install.packages("tensorflow")
@@ -12,133 +22,135 @@ library(tidyverse)
 load("./Data/covariate_matrix.RData")
 load("./Data/Y_vector_classification.RData")
 
-Y <- to_categorical(Y_vector)
+# we first create a function that builds our CNN
 
-model <- keras_model_sequential() 
-model %>% 
-  layer_dense(units = ncol(X_matrix), activation = "sigmoid", input_shape = ncol(X_matrix)) %>% 
-  layer_dense(units = 256, activation = "sigmoid") %>%
-  layer_dense(units = 4, activation = "softmax")
+Y_vector <- to_categorical(Y_vector)  # keras requires a specific kind of vector as target
 
-model %>% compile(
-  loss = "categorical_crossentropy",
-  optimizer = optimizer_sgd(),
-  metrics = c("accuracy")
-)
-
-training <- model %>% fit(
-  X_matrix, Y, 
-  epochs = 50, batch_size = 128, 
-  validation_split = 0.2)
-
-pred <- model %>% predict_classes(X_matrix)
-
-misclassification_matrix = matrix(0, ncol(Y)-1, ncol(Y)-1)
-for (i in 2:ncol(Y)) {
-  for (j in 1:(ncol(Y)-1)) {
-    misclassification_matrix[j ,i-1] = length(which((Y[,i] == 1) & (pred == i-1))) / length(which((Y[,i] == 1)))
-  }
-}
-
-Beta <- model$get_weights()
-Beta_input <- Beta[[1]]
-Beta_input2 <- Beta[[2]]
-Beta_hidden <- Beta[[3]]
-Beta_hidden2 <- Beta[[4]]
-Beta_output <- Beta[[5]]
-Beta_output2 <- Beta[[6]]
-############################################################## 10-fold cv now
-
-k = 10
-
-model_build <- function(){
+build_model <- function(){
   
-  model <- keras_model_sequential() 
-  model %>% 
-    layer_dense(units = ncol(X_k), activation = "sigmoid", input_shape = ncol(X_k)) %>% 
+  model <- keras_model_sequential() %>%
+    layer_dense(units = ncol(X_matrix), activation = "sigmoid",
+                input_shape = ncol(X_matrix)) %>%
     layer_dense(units = 128, activation = "sigmoid") %>%
     layer_dense(units = 4, activation = "softmax")
   
   model %>% compile(
     loss = "categorical_crossentropy",
     optimizer = optimizer_sgd(),
-    metrics = c("accuracy")
+    metrics = list("accuracy")
   )
   model
   
 }
 
-cv_error <- rep(NA, k)
-y_classified <- rep(NA, nrow(X_matrix))
+############################################################## 10-fold cv now
 
-for (i in 1:k){
+optim_CNN <- function(e, X, Y){
   
-  X_k <- X_matrix[(1 + (i-1)*nrow(X_matrix)/k):(i*(nrow(X_matrix)/k)),]
-  Y_k <- to_categorical(Y_vector[(1 + (i-1)*nrow(X_matrix)/k):(i*(nrow(X_matrix)/k))])
-  X_test <- X_matrix[-((1 + (i-1)*nrow(X_matrix)/k) : (i*(nrow(X_matrix)/k))),]
-  Y_test <- Y_vector[-((1 + (i-1)*nrow(X_matrix)/k) : (i*(nrow(X_matrix)/k)))]
+  fold = 10
+  cv_error <- rep(NA, fold)
   
-  model <- model_build()
+  for (i in 1:fold){
+    
+    X_k <- X[-((1 + (i-1)*nrow(X)/fold) : (i*nrow(X)/fold)),]
+    Y_k <- Y[-((1 + (i-1)*nrow(X)/fold) : (i*nrow(X)/fold)),]
+    X_test <- X[(1 + (i-1)*nrow(X)/fold) : (i*nrow(X)/fold),]
+    Y_test <- Y[(1 + (i-1)*nrow(X)/fold) : (i*nrow(X)/fold),]
+    
+    model <- build_model()
+    
+    training <- model %>% fit(
+      X_k, Y_k, 
+      epochs = e, batch_size = 128,
+      validation.split = 0,
+      verbose =  0)
+    
+    pred <- model %>% predict(X_test)
+    
+    cv_error[i] <- mean(abs(Y_test - pred))
+    
+  }
   
-  training <- model %>% fit(
-    X_k, Y_k, 
-    epochs = 50, batch_size = 1024,
-    validation.split = 0,
-    verbose = 0)
-  
-  pred <- model %>% predict_classes(X_test)
-  y_classified[-((1 + (i-1)*nrow(X_matrix)/k) : (i*(nrow(X_matrix)/k)))] <- pred
-  cv_error[i] <- mean(abs(Y_test - pred))
-
+  return(mean(cv_error))
 }
 
-print(mean(cv_error))
+# since we're training the model with a validation.split of 0, we risk overfitting it, so we search for the epochs,
+# which get the smallest MAE on unseen data
 
-misclassification_matrix = matrix(0, ncol(Y)-1, ncol(Y)-1)
-for (i in 2:ncol(Y)) {
-  for (j in 1:(ncol(Y)-1)) {
-    misclassification_matrix[j ,i-1] = length(which((Y[,i] == 1) & (y_classified == i-1))) / length(which((Y[,i] == 1)))
+possible_eopchs = 1:15
+errors <- rep(NA, length(possible_eopchs))
+for (i in possible_eopchs){
+  errors[i] <- optim_CNN(i, X_matrix, Y_vector)
+}
+
+best_epochs <- which(errors == min(errors))
+print(best_epochs)
+print(errors) # this is our best MAE in a 10-fold CV, the epochs were 4 and the MAE 17
+
+######################################################### Let's use the best number of epochs to build a non-cv model
+
+model <- build_model()
+
+training <- model %>% fit(
+  X_matrix, Y_vector, 
+  epochs = best_epochs, batch_size = 128,
+  validation.split = 0,
+  verbose =  0)
+
+pred <- model %>% predict(X_matrix)
+error <- mean(abs(Y_vector - pred))
+print(error)
+
+misclassification_matrix = matrix(0, ncol(Y_vector)-1, ncol(Y_vector)-1)
+for (i in 2:ncol(Y_vector)) {
+  for (j in 1:(ncol(Y_vector)-1)) {
+    misclassification_matrix[j ,i-1] = length(which((Y_vector[,i] == 1) & (pred == j))) / length(which((Y_vector[,i] == 1)))
   }
 }
 print(misclassification_matrix)
 
+install.packages("rlist")
+library(rlist)
+weights_reg <- model$get_weights()
+list.save(weights_reg, "Data/weights_reg.RData")
 
-###################################################################################
+##############################################################  here we use the weights of the model to predict with matrix multiplication
 
-sigmoid <- function(z) {
-  x = 1/(1 + exp(z))
-}
+rm(list = ls())
 
-SoftMax <- function (z){
-  x = exp(z) / sum(exp(z))
+load("./Data/covariate_matrix_reg.RData")
+load("./Data/Y_vector_regression.RData")
+load("./Data/weights_reg.RData")
+Beta <- x
+
+Beta_input <- Beta[[1]]
+Beta_input2 <- Beta[[2]]
+Beta_hidden <- Beta[[3]]
+Beta_hidden2 <- Beta[[4]]
+Beta_output <- Beta[[5]]
+Beta_output2 <- Beta[[6]]
+
+relu = function(z) {
+  x = log(1 + exp(z))
 }
 
 X <- cbind(rep(1, nrow(X_matrix)), X_matrix)
 Beta_input_true <- cbind(Beta_input2, t(Beta_input))
 
-A <- sigmoid(Beta_input_true %*% t(X))
+Input_layer <- tanh(Beta_input_true %*% t(X))
 
-A <- t(A)
-A <- cbind(rep(1, nrow(A)), A)
+Input_layer <- t(Input_layer)
+Input_layer<- cbind(rep(1, nrow(Input_layer)), Input_layer)
 Beta_hidden_true <- cbind(Beta_hidden2, t(Beta_hidden))
-dim(Beta_hidden_true)
-dim(A)
-P <- sigmoid(Beta_hidden_true %*% t(A))
 
-P <- t(P)
-P <- cbind(rep(1, nrow(P)), P)
+Hidden_layer <- tanh(Beta_hidden_true %*% t(Input_layer))
+
+Hidden_layer <- t(Hidden_layer)
+Hidden_layer <- cbind(rep(1, nrow(Hidden_layer)), Hidden_layer)
 Beta_output_true <- cbind(Beta_output2, t(Beta_output))
 
-Pred <- SoftMax(Beta_output_true %*% t(P))
+Pred <- relu(Beta_output_true %*% t(Hidden_layer))
 Pred <- t(Pred)
 
-y_classified <- apply(Pred, 1, FUN = which.max)
-
-Errors = mean(abs(Y_vector - (y_classified-1)))
-misclassification_matrix = matrix(0, ncol(Y)-1, ncol(Y)-1)
-for (i in 2:ncol(Y)) {
-  for (j in 1:(ncol(Y)-1)) {
-    misclassification_matrix[j ,i-1] = length(which((Y[,i] == 1) & (y_classified == i))) / length(which((Y[,i] == 1)))
-  }
-}
-print(misclassification_matrix)
+MAE = mean(abs(Y_vector - round(Pred, 0)))
+print(MAE)
