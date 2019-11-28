@@ -26,9 +26,8 @@ load("./Data/Y_vector_regression.RData") # the name of this vector is Y_vector
 
 
 # The code for Parallel computation is based on the script of JPO, Day 1, Polynomial regression splines Ex_2_2_polynomial_regression_parallel.txt
-
 # Parallel computation
-cl = makeCluster(6)
+cl = makeCluster(4)
 #registerDoSNOW(cl)
 registerDoParallel(cl)
 
@@ -204,4 +203,5 @@ print(best_parameters_opt_LOO)
 print(min(error_opt_LOO))
 
 #error_opt_LOO = ?
+
 
