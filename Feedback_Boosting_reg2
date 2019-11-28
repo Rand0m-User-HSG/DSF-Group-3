@@ -38,10 +38,9 @@ registerDoParallel(cl)
 
 X_matrix <- data.frame(X_matrix)
 
-model_gbm = gbm(Y_vector  ~., data = X_matrix  ,distribution = "gaussian",cv.folds = 10,
-                shrinkage = .01, n.trees = 3000)
+model_gbm = gbm(Y_vector  ~., data = X_matrix  ,distribution = "gaussian", shrinkage = .01, n.trees = 500)
 
-pred = predict.gbm(model_gbm, X_matrix ,n.trees = 3000, type = "link")
+pred = predict.gbm(model_gbm, X_matrix ,n.trees = 500, type = "link")
 #I added n.trees = 3000, right? 
 
 yn_forecasted <- pred
@@ -67,11 +66,10 @@ for (i in 1:k) {
   xn_test = data.frame(X_matrix[(1+(i-1)*nrow(X_matrix)/k):(i*nrow(X_matrix)/k),])
   yn_test = Y_vector[(1+(i-1)*nrow(X_matrix)/k):(i*nrow(X_matrix)/k)]
   
-  model_gbm = gbm(yn  ~., data = xn  ,distribution = "gaussian",cv.folds = 10,
-                  shrinkage = .01, n.trees = 3000)
+  model_gbm = gbm(yn  ~., data = xn  ,distribution = "gaussian", shrinkage = .01, n.trees = 500)
   
-  pred = predict.gbm(model_gbm, xn_test, n.trees = 3000 ,type = "link")
-  #I added n.trees = 3000, right? 
+  pred = predict.gbm(model_gbm, xn_test, n.trees = 500 ,type = "link")
+
   
   yn_forecasted <- pred
   sum_of_10_fold_cv_MSEs = sum_of_10_fold_cv_MSEs + sum((yn_test - yn_forecasted)^2, na.rm = T)  / (length(yn_test)) # replaced Y_vector by yn_test, because it must have the same length as yn_forecasted; also adjusted the formulation of the error variable (see line 57)
@@ -109,8 +107,7 @@ for (i in 1:k) {
   xn_test = data.frame(X_matrix[(1+(i-1)*nrow(X_matrix)/k):(i*nrow(X_matrix)/k),])
   yn_test = Y_vector[(1+(i-1)*nrow(X_matrix)/k):(i*nrow(X_matrix)/k)]
   
-  model_gbm = gbm(yn  ~., data = xn  ,distribution = "gaussian",cv.folds = k,
-                  shrinkage = .01, n.minobsinnode = 10, n.trees = 500)
+  model_gbm = gbm(yn  ~., data = xn  ,distribution = "gaussian", shrinkage = .01, n.minobsinnode = 10, n.trees = 500)
   
   pred = predict.gbm(model_gbm, xn_test, type = "link")
   
