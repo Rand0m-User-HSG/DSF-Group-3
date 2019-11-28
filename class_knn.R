@@ -7,8 +7,6 @@
 rm(list=ls())
 library(tidyverse)
 
-# I've cut lines 12-13, because you had loaded the data for regression
-
 # we load the covariate matrix with dummy variables that was produced in covariate_matrix_with_dummy_variables.R
 load("./Data/covariate_matrix.RData") # the name of this matrix is X_matrix
 
@@ -26,10 +24,10 @@ optim_knn <- function(K, X, Y){
   
   for (i in 1:fold){
     
-    X_k <- X[(1 + (i-1)*nrow(X)/fold):(i*(nrow(X)/fold)),]
-    Y_k <- Y[(1 + (i-1)*nrow(X_matrix)/fold):(i*(nrow(X)/fold))]
-    X_test <- X[-((1 + (i-1)*nrow(X)/fold) : (i*(nrow(X)/fold))),]
-    Y_test <- Y[-((1 + (i-1)*nrow(X)/fold) : (i*(nrow(X)/fold)))]
+    X_k <- X[-((1 + (i-1)*nrow(X)/fold):(i*(nrow(X)/fold))),]
+    Y_k <- Y[-((1 + (i-1)*nrow(X_matrix)/fold):(i*(nrow(X)/fold)))]
+    X_test <- X[(1 + (i-1)*nrow(X)/fold) : (i*(nrow(X)/fold)),]
+    Y_test <- Y[(1 + (i-1)*nrow(X)/fold) : (i*(nrow(X)/fold))]
     
     pred <- as.numeric(knn(X_k, X_test, cl = Y_k, k = K))
     
@@ -42,7 +40,7 @@ optim_knn <- function(K, X, Y){
   return(errors)
 }
 
-possible_k <- 1:2
+possible_k <- 150:230
 error <- rep(NA, length(possible_k))
 for (i in possible_k){
   error[i] <- optim_knn(i, X_matrix, Y_vector)
@@ -60,10 +58,10 @@ y_classified <- rep(NA, nrow(X_matrix))
 
 for (i in 1:fold){
   
-  X_k <- X_matrix[(1 + (i-1)*nrow(X_matrix)/fold):(i*(nrow(X_matrix)/fold)),]
-  Y_k <- Y_vector[(1 + (i-1)*nrow(X_matrix)/fold):(i*(nrow(X_matrix)/fold))]
-  X_test <- X_matrix[-((1 + (i-1)*nrow(X_matrix)/fold) : (i*(nrow(X_matrix)/fold))),]
-  Y_test <- Y_vector[-((1 + (i-1)*nrow(X_matrix)/fold) : (i*(nrow(X_matrix)/fold)))]
+  X_k <- X_matrix[-((1 + (i-1)*nrow(X_matrix)/fold):(i*(nrow(X_matrix)/fold))),]
+  Y_k <- Y_vector[-((1 + (i-1)*nrow(X_matrix)/fold):(i*(nrow(X_matrix)/fold)))]
+  X_test <- X_matrix[(1 + (i-1)*nrow(X_matrix)/fold) : (i*(nrow(X_matrix)/fold)),]
+  Y_test <- Y_vector[(1 + (i-1)*nrow(X_matrix)/fold) : (i*(nrow(X_matrix)/fold))]
   
   pred <- as.numeric(knn(X_k, X_test, cl = Y_k, k = k_best))
   
