@@ -18,9 +18,17 @@ library(maboost)
 library(lattice)
 library(tidyverse)
 library(caret)
+library(doParallel)
+
 
 load("./Data/X_matrix_classification_number_accidents.RData")
 load("./Data/Y_vector_classification_number_accidents.RData")
+
+# The code for Parallel computation is based on the script of JPO, Day 1, Polynomial regression splines Ex_2_2_polynomial_regression_parallel.txt
+# Parallel computation
+cl = makeCluster(4)
+#registerDoSNOW(cl)
+registerDoParallel(cl)
 
 
 ####Generalized multicass classification without cross validation####
