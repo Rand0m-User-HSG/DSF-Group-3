@@ -22,15 +22,21 @@ cl = makeCluster(32)
 registerDoParallel(cl)
 
 #The following code runs a LASSO regression on our data. It belongs to the glmnet library.
-mod_cv <- cv.glmnet(x=X_matrix, y=Y_vector, nfolds = nrow(X_matrix), family = "gaussian", alpha = 1)
+model_cv <- cv.glmnet(x=X_matrix, y=Y_vector, nfolds = nrow(X_matrix), family = "gaussian", alpha = 1)
 
-stopCluster(cl)
+
 
 # Find the best lambda
-mod_cv$lambda.1se
+model_cv$lambda.1se
+
+# The following code runs the LASSO regression with the optimal lambda.
+model_cv_lambda.1se <- cv.glmnet(x=X_matrix, y=Y_vector, nfolds = nrow(X_matrix), family = "gaussian", alpha = 1, lambda = model_cv$lambda.1se)
+
+
+stopCluster(cl)
 
 
 
 #Now we want the betas
-beta=coef(mod_cv)
+beta=coef(model_cv_lambda.1se)
 print(beta)
