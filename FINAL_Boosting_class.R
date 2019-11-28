@@ -1,4 +1,4 @@
-#Maboost##
+##Maboost##
 
 #####Introduction####
 
@@ -22,8 +22,9 @@ library(doParallel)
 load("./Data/covariate_matrix.RData")
 load("./Data/Y_vector_classification.RData")
 
+# The code for Parallel computation is based on the script of JPO, Day 1, Polynomial regression splines Ex_2_2_polynomial_regression_parallel.txt
 # Parallel computation
-cl = makeCluster(6)
+cl = makeCluster(4)
 #registerDoSNOW(cl)
 registerDoParallel(cl)
 
