@@ -7,27 +7,35 @@ library(gbm)
 load("./Data/covariate_matrix_reg.RData")
 load("./Data/Y_vector_regression.RData")
 
-optim_boosting<- function(trees, X, Y){
+optim_boosting<- function(depth, trees, X, Y){
   
   fold = 10
   X <- data.frame(X)
-  Y <- as.double((Y))
+  Y <- as.double(Y)
   
   model_gbm = gbm(Y ~., data = X, distribution = "gaussian", shrinkage = .1, n.trees = trees, 
-                    interaction.depth = 2, cv.folds = fold)
+                    interaction.depth = depth, cv.folds = fold)
   
   pred <- model_gbm$fit
   
   return(mean(abs(Y_vector - pred)))
 }
 
+possible_depth <- 1:2
 possible_trees <- 100:101
-error <- rep(NA, length(possible_trees))
 
-for (j in possible_trees){
-  error[j-99] <- optim_boosting(j, X_matrix, Y_vector)
+row = 0 
+col = 0
+error <- matrix(NA, nrow = length(possible_trees), ncol = length(possible_depth)
+
+for (k in possible_depth){
+  col = col +1
+  for (j in possible_trees){
+    row = row +1
+    error[row, col] <- optim_boosting(k, j, X_matrix, Y_vector)
+  }
 }
 
-best_trees <- 99 + which(error == min(error))
-print(best_trees)
+best_parameters <- which(error == min(error), arr.ind = T) # remember to adjust it based on the start of the possible_trees (and depth)
+print(best_parameters)
 print(min(error))
