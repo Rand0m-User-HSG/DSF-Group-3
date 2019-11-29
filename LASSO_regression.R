@@ -29,10 +29,6 @@ model_cv <- cv.glmnet(x=X_matrix, y=Y_vector, nfolds = nrow(X_matrix), family = 
 # Find the best lambda
 model_cv$lambda.1se
 
-# The following code runs the LASSO regression with the optimal lambda.
-model_cv_lambda.1se <- cv.glmnet(x=X_matrix, y=Y_vector, nfolds = nrow(X_matrix), family = "gaussian", alpha = 1, lambda = model_cv$lambda.1se)
-
-
 stopCluster(cl)
 
 
