@@ -71,7 +71,7 @@ for (i in 1:k) {
   
   y_classified_cv[(1+(i-1)*nrow(X_matrix)/k):(i*nrow(X_matrix)/k)] <- pred_cv
   
-  Empirical_error_cv = length(which(y_classified_cv != Y_vector)) / n
+  Empirical_error_cv[i] = length(which(y_classified_cv[(1+(i-1)*nrow(X_matrix)/k):(i*nrow(X_matrix)/k)] != yn_test)) / length(yn_test)
 }
 
 # Empirical_error_cv = 0.2142199
