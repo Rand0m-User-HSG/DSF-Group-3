@@ -147,7 +147,7 @@ optim_boosting_cv(9000, X_matrix, Y_vector)
 optim_boosting_cv(10000, X_matrix, Y_vector)
 
 possible_depth_opt_cv <- 1:2
-possible_trees_opt_cv <- 9750:10000
+possible_trees_opt_cv <- 1000:1001
 
 row = 0 
 col = 0
@@ -155,6 +155,7 @@ error_opt_cv <- matrix(NA, nrow = length(possible_trees_opt_cv), ncol = length(p
 
 for (k in possible_depth_opt_cv){
   col = col +1
+  row = 0
   for (j in possible_trees_opt_cv){
     row = row +1
     error_opt_cv[row, col] <- optim_boosting_cv(k, j, X_matrix, Y_vector)
@@ -163,6 +164,9 @@ for (k in possible_depth_opt_cv){
 
 best_parameters_opt_cv<- which(error_opt_cv == min(error_opt_cv), arr.ind = T) # remember to adjust it based on the start of the possible_trees (and depth)
 print(best_parameters_opt_cv)
+#   2   2
+#interaction.depth = 2, n.trees = 1001
 print(min(error_opt_cv))
 
-#error_opt_cv = ?
+
+#error_opt_cv = 2.302519
