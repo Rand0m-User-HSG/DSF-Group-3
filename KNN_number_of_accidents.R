@@ -40,8 +40,8 @@ optim_knn <- function(K, X, Y){
   return(errors)
 }
 
-# We use the interval of 40:60, as there is a rule of thumb, that the best k is a
-# pprox. the sqrt of the number of observations, which in this case is 53.8.
+# We use the interval of 1:60, as there is a rule of thumb, that the best k is 
+# approx. the sqrt of the number of observations, which in this case is 53.8.
 possible_k <- 40:60
 error <- rep(NA, length(possible_k))
 for (i in possible_k){
@@ -49,7 +49,7 @@ for (i in possible_k){
 }
 
 k_best <- which(error == min(error))
-print(k_best)
+print(k_best) #53
 # p <- optim(1, optim_knn, X = X_matrix, Y = Y_vector,  method = "Brent", lower = 1, upper = 2)  # the parameters are real values, while we only want integers
 
 ############################################################################ 10 fold cv with best k
