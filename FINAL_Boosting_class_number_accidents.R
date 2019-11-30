@@ -26,7 +26,7 @@ load("./Data/Y_vector_classification_number_accidents.RData")
 # 10-folds cross-validation with optimization
 
 
-optim_boosting <- function(cf, mincases, X, Y){
+optim_boosting <- function(CF, mincases, X, Y){
   
   fold = 10
   error <- rep(NA, fold)
@@ -42,7 +42,7 @@ optim_boosting <- function(cf, mincases, X, Y){
     
     pred = predict(model, x_test, type="class")
     
-    error[i] <- mean(abs(y_test - pred_opt_cv))
+    error[i] <- mean(abs(y_test - pred))
     
   }
   
@@ -53,7 +53,7 @@ min_cases = 2:6
 
 CF_possibilities <- seq(from = .1, to = 1, by = .1)
 
-errors <- matrix(NA, ncol = length(min_cases_opt_cv), nrow = length(CF_possibilities_opt_cv))
+errors <- matrix(NA, ncol = length(min_cases), nrow = length(CF_possibilities))
 
 col = 0
 for (k in min_cases){
@@ -61,7 +61,7 @@ for (k in min_cases){
   row = 0
   for (j in CF_possibilities){
     row = row + 1
-    errors[row, col] = optim_boosting_opt_cv(k, j, X_matrix, Y_vector)
+    errors[row, col] = optim_boosting(k, j, X_matrix, Y_vector)
   }
 }
 
@@ -75,6 +75,7 @@ print(min(errors))
 
 
 ##PLEASE PLUG THE BEST VALUES IN THE THREE FOLLOWING MODELS
+
 ####Generalized multicass classification without cross validation####
 
 num_classes = 9
