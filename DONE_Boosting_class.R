@@ -79,33 +79,3 @@ for (i in 1:num_degrees) {
     misclassification_matrix_opt_cv[i, j] = length((which(Y_vector == i == i) & (y_classified_opt_cv == j))) / length(which((Y_vector == i == i)))
   }
 }
-
-
-####Leave-one-out cross-validation####
-
-k = nrow(X_matrix)
-num_degrees = 3
-Empirical_error_LOO = rep(NA, k)
-pred_LOO = matrix(NA, nrow = nrow(X_matrix)/k, ncol = k)
-y_classified_LOO = rep(NA, length(Y_vector))
-X_matrix = data.frame(X_matrix)
-
-for (i in 1:k) {
-  
-  yn = Y_vector[-((1+(i-1)*nrow(X_matrix)/k):(i*nrow(X_matrix)/k))]
-  xn = X_matrix[-((1+(i-1)*nrow(X_matrix)/k):(i*nrow(X_matrix)/k)),]
-  xn_test = data.frame(X_matrix[(1+(i-1)*nrow(X_matrix)/k):(i*nrow(X_matrix)/k),])
-  yn_test = Y_vector[(1+(i-1)*nrow(X_matrix)/k):(i*nrow(X_matrix)/k)]
-  
-  model_maboost_LOO = maboost(x = xn, y = yn, iter = 5, nu = .1, C50tree = T, C5.0Control(CF = .2, minCase = 128))
-  
-  pred_LOO = predict(model_maboost_LOO,xn_test,type="class");
-  
-  y_classified_LOO[(1+(i-1)*nrow(X_matrix)/k):(i*nrow(X_matrix)/k)] <- pred_LOO
-  
-  Empirical_error_LOO[i] = length(which(y_classified_LOO[(1+(i-1)*nrow(X_matrix)/k):(i*nrow(X_matrix)/k)] != yn_test)) / length(yn_test)
-}
-
-# Empirical_error_LOO = ?
-# The computational time is really long, circa 196 hours, to compute the errors for Leave-one-out cross validation.
-# For this reason, we were not able to calculate the error. 
