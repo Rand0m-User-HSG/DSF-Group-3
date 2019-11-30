@@ -40,7 +40,7 @@ optim_knn <- function(K, X, Y){
   return(errors)
 }
 
-possible_k <- 150:230
+possible_k <- 1:230
 error <- rep(NA, length(possible_k))
 for (i in possible_k){
   error[i] <- optim_knn(i, X_matrix, Y_vector)
