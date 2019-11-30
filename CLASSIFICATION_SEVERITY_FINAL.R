@@ -443,8 +443,8 @@ print(misclassification_matrix_NN)
 # That said our models coudn't find a "real" way to predict the severity of the accident,
 # instead they all started predicting every accident to be a light injury, that is a class number 3.
 # The reasons for this can be various:
-# Firstly our data is heavily biased on the light injuries, which take around 78.5% of the data points,
-# while severe_injuries take 21% and fatalities only 0.5%. If this is a problem we tried 2 solutions in the
+# Firstly our data is heavily biased on the light injuries, which take around 78.58% of the data points,
+# while severe_injuries take 20.35% and fatalities only 1.07%. If this is a problem we tried 2 solutions in the
 # scripts sampling.R and SMOTE.R, in which we work with less biased data.
 # Another reasons could be that our data is uncorrect, especially the wheater data. We think we can strike this reason out
 # as it's not believable from a respected site like the NOAA to have corrupted data. We also used meteoswiss for the data
