@@ -148,9 +148,9 @@ for (i in 1:fold){
 cv_error_knn <- mean(cv_error_knn)
 print(cv_error_knn)  # we get an error of .2362498
 
-misclassification_matrix_knn = matrix(0, unique(Y_vector), unique(Y_vector))
-for (i in 1:unique(Y_vector)) {
-  for (j in 1:unique(Y_vector)) {
+misclassification_matrix_knn = matrix(0, length(unique(Y_vector)), length(unique(Y_vector)))
+for (i in 1:length(unique(Y_vector))) {
+  for (j in 1:length(unique(Y_vector)))) {
     misclassification_matrix_knn[i ,j] = length(which((Y_vector == i) & (y_classified_knn == j))) / length(which((Y_vector == i)))
   }
 }
@@ -248,10 +248,10 @@ for (i in 1:fold) {
   
 }
 
-misclassification_matrix_boosting = matrix(0, unique(Y_vector), unique(Y_vector))
+misclassification_matrix_boosting = matrix(0, length(unique(Y_vector), length(unique(Y_vector))
 
-for (i in 1:unique(Y_vector)) {
-  for (j in 1:unique(Y_vector)) {
+for (i in 1:length(unique(Y_vector)) {
+  for (j in 1:length(unique(Y_vector)) {
     misclassification_matrix_boosting[i ,j] = length(which((Y_vector == i) & (y_classified_boosting == j))) / length(which((Y_vector == i)))
   }
 }
@@ -366,9 +366,9 @@ y_classified_NN<- 1 + model %>% predict_classes(X_matrix)
 error <- mean(abs(Y_vector - y_classified_NN))
 print(error)
 
-misclassification_matrix_NN = matrix(0, unique(Y_vector), unique(Y_vector))
-for (i in 1:unique(Y_vector)) {
-  for (j in 1:unique(Y_vector)) {
+misclassification_matrix_NN = matrix(0, length(unique(Y_vector), length(unique(Y_vector))
+for (i in 1:length(unique(Y_vector))) {
+  for (j in 1:length(unique(Y_vector)) {
     misclassification_matrix_NN[i ,j] = length(which((Y_vector == i) & (y_classified_NN == j))) / length(which((Y_vector == i)))
   }
 }
