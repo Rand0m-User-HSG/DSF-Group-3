@@ -73,25 +73,6 @@ print(best_parameters_opt_cv)
 print(min(error_opt_cv))
 
 ##INSERER BEST PARAMETERS DANS LE MODEL WITH LEAVE ONE OUT
-####Generalized multicass classification without cross validation####
-
-num_classes = 9
-n = dim(X_matrix)[1]
-p = dim(X_matrix)[2]
-pred = matrix(NA, nrow = nrow(X_matrix), ncol = 1)
-y_classified = rep(NA, length(Y_vector))
-X_matrix = data.frame(X_matrix)
-
-model_maboost = maboost(X_matrix, Y_vector, iter = 5, nu = .1, C50tree = T, C5.0Control(CF = .2, minCase = 128))
-
-pred = predict(model_maboost,X_matrix,type="class")
-
-y_classified =  pred
-
-Empirical_error = length(which(y_classified != Y_vector)) / n
-
-# Empirical_error = 0.5909562
-
 
 ####Leave-one-out cross-validation###
 
