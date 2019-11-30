@@ -328,11 +328,11 @@ optim_NN <- function(e, X, Y){
     
     pred <- model %>% predict(X_test)
     
-    cv_error[i] <- length(which(Y_test != as.double(pred)))/length(Y_test)
+    cv_error[i] <- length(which(Y_vector[(1 + (i-1)*nrow(X)/fold) : (i*nrow(X)/fold)] != pred))
     
   }
   
-  return(mean(cv_error))
+  return(sum(cv_error)/length(Y_vector))
 }
 
 # since we're training the model with a validation.split of 0, we risk overfitting it, so we search for the epochs,
