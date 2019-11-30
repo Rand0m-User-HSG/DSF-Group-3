@@ -62,7 +62,7 @@ for (i in 1:fold) {
   y_classified_log[lower_bound_i:upper_bound_i] = apply(cbind(rep(1,round(nrow(X_matrix)/fold)), x_test) %*% beta_one_vs_all_cv , 1, FUN=which.max)
 }
 
-cv_error_log = mean(abs(Y_vector - y_classified_log))
+cv_error_log = length(which(Y_vector != y_classified_log))/length(Y_vector)
 print(cv_error_log)
 
 misclassification_matrix_log = matrix(0, num_degrees, num_degrees)
@@ -102,7 +102,7 @@ optim_knn <- function(K, X, Y){
     
     pred <- as.numeric(knn(X_k, X_test, cl = Y_k, k = K))
     
-    cv_error[i] <- mean(abs(Y_test - pred))
+    cv_error[i] <- length(which(Y_test != pred))/length(Y_test)
     
   }
   
@@ -141,7 +141,7 @@ for (i in 1:fold){
   pred <- as.numeric(knn(X_k, X_test, cl = Y_k, k = 9))
   
   y_classified_knn[(1 + (i-1)*nrow(X_matrix)/fold) : (i*(nrow(X_matrix)/fold))] <- pred
-  cv_error_knn[i] <- mean(abs(Y_test - pred))
+  cv_error_knn[i] <- length(which(Y_test - pred))/length(Y_test)
   
 }
 
@@ -192,7 +192,7 @@ optim_boosting <- function(cf, mincases, X, Y){
     
     pred = predict(model, x_test, type="class")
     
-    error[i] <- mean(abs(y_test - as.double(pred)))
+    error[i] <- length(which(y_test != as.double(pred)))/length(y_test)
     
   }
   
@@ -244,7 +244,7 @@ for (i in 1:fold) {
   pred = predict(model, x_test, type="class")
   
   y_classified_boosting[(1+(i-1)*nrow(X_matrix)/fold):(i*nrow(X_matrix)/fold)] <- pred
-  error_boosting[i] <- mean(abs(y_test - as.double(pred)))
+  error_boosting[i] <- length(which(y_test - as.double(pred)))/length(y_test)
   
 }
 
@@ -328,7 +328,7 @@ optim_NN <- function(e, X, Y){
     
     pred <- model %>% predict(X_test)
     
-    cv_error[i] <- mean(abs(Y_test - pred))
+    cv_error[i] <- length(which(Y_test != as.double(pred)))/length(Y_test)
     
   }
   
@@ -363,7 +363,7 @@ training <- model %>% fit(
   verbose =  1)
 
 y_classified_NN<- 1 + model %>% predict_classes(X_matrix)
-error <- mean(abs(Y_vector - y_classified_NN))
+error <- length(which(Y_vector != y_classified_NN))/length(Y_vector)
 print(error)
 
 misclassification_matrix_NN = matrix(0, length(unique(Y_vector), length(unique(Y_vector))
@@ -416,7 +416,7 @@ Pred <- Beta_output_true %*% softmax(t(Hidden_layer))
 Pred <- t(Pred)
 Pred <- apply(Pred , 1, FUN=which.max)
 
-error_NN = mean(abs(Y_vector - Pred))
+cv_error_NN = length(which(Y_vector != Pred))/length(Y_vector)
 print(error_NN)                                                           # the error stays the same
 
 
