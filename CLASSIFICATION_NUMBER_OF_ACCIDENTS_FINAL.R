@@ -67,7 +67,7 @@ for (i in 1:fold) {
 }
 
 cv_error_log = length(which(Y_vector != y_classified_log))/length(Y_vector)
-print(cv_error_log)
+print(cv_error_log) # cv_error_log = 0.8726269
 
 misclassification_matrix_log = matrix(0, num_degrees, num_degrees)
 for (i in 1:num_degrees) {
