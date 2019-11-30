@@ -11,6 +11,8 @@ rm(list =ls())
 
 #install.packages("maboost")
 #install.packages("caret")
+#install.packages("C50")
+
 library(rpart)
 library(C50)
 library(maboost)
