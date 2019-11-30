@@ -188,7 +188,7 @@ optim_boosting <- function(cf, mincases, X, Y){
     x_test = data.frame(X[(1+(i-1)*nrow(X)/fold):(i*nrow(X)/fold),])
     y_test = Y[(1+(i-1)*nrow(X)/fold):(i*nrow(X)/fold)]
     
-    model = maboost(x = x_train, y = y_train, iter = 1, verbose = 1 ,nu = .1, C50tree = T, C5.0Control(CF = j, minCase = k))
+    model = maboost(x = x_train, y = y_train, iter = 1, verbose = 1 ,nu = .1, C50tree = T, C5.0Control(CF = cf, minCase = mincases))
     
     pred = predict(model, x_test, type="class")
     
@@ -196,7 +196,7 @@ optim_boosting <- function(cf, mincases, X, Y){
     
   }
   
-  return(error)
+  return(mean(error))
 }
 
 min_cases = 2:6
