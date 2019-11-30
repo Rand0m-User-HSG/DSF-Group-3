@@ -24,7 +24,7 @@ load("./Data/Y_vector_classification.RData") # the name of this vector is Y_vect
 # and endeavour to cross-validate these results
 # we use 10-fold cross-validation to save computational time
 
-num_degrees = unique(Y_vector)
+num_degrees = length(unique(Y_vector))
 p = ncol(X_matrix)
 fold = 10
 beta_one_vs_all_cv = matrix(0, p + 1, num_degrees)
