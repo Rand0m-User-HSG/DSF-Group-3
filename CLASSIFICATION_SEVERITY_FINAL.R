@@ -258,7 +258,7 @@ for (i in 1:unique(Y_vector)) {
 
 print(misclassification_matrix_boosting)
 cv_error_boosting <- mean(error_boosting)
-print(error_boosting)
+print(cv_error_boosting) # cv_error_boosting = 0.2251428
 
 
 #### last but not least we train a neural network ####
