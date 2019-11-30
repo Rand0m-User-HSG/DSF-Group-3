@@ -138,7 +138,7 @@ print(cv_error_knn)
 print(error)   # the best k is unrelevant, as the errors are extremely similars, for good form we're gonna pick 54
 # We now run a 10-fold cv with the best k we found in the optimization
 
-k_best = 55
+k_best = 54
 fold <- 10
 cv_error_knn <- rep(NA, fold)
 y_classified_knn <- rep(NA, nrow(X_matrix))
