@@ -158,7 +158,7 @@ for (i in 1:fold){
 }
 
 cv_error_knn <- mean(cv_error_knn)
-print(cv_error_knn)
+print(cv_error_knn) # cv_error_knn = 0.8795848
 
 misclassification_matrix_knn = matrix(0, num_degrees, num_degrees)
 for (i in 1:num_degrees) {
