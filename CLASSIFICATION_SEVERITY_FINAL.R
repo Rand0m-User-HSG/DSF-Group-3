@@ -117,7 +117,7 @@ index = 0
 
 for (i in possible_k){
   index = index + 1
-  error[index] <- optim_knn(i, X_matrix, Y_matrix)
+  error[index] <- optim_knn(i, X_matrix, Y_vector)
 }
 
 k_best <- which(error == min(error)) + 210 -1
