@@ -13,6 +13,8 @@ sum(Y_vector > 19)/length(Y_vector) # 0.35%
 Y_vector[which(Y_vector > 19)] <- 19
 Y_vector <- Y_vector + 1  # this helps simplify the code, we just need to remember to take 1 out from the predictions
 
+num_degrees = length(unique(Y_vector))
+
 #### Introduction ####
 # In this script we train and evaluate different models for a classication task.
 # The goal is to predict the number of accidents happening in a given day in the canton Zürich.
@@ -29,7 +31,6 @@ Y_vector <- Y_vector + 1  # this helps simplify the code, we just need to rememb
 # and endeavour to cross-validate these results
 # we use 10-fold cross-validation to save computational time
 
-num_degrees = length(unique(Y_vector))
 p = ncol(X_matrix)
 fold = 10
 beta_one_vs_all_cv = matrix(0, p + 1, num_degrees)
@@ -132,7 +133,7 @@ for (i in possible_k){
 }
 
 k_best <- which(error == min(error)) + 46 -1
-print(k_best)  # the best k is unrelevant, as the errors are extremely similars, for good form we're gonna pick 54
+print(k_best)  
 cv_error_knn = min(error)
 print(cv_error_knn)
 print(error)   # the best k is unrelevant, as the errors are extremely similars, for good form we're gonna pick 54
@@ -200,7 +201,7 @@ optim_boosting <- function(cf, mincases, X, Y){
     x_test = data.frame(X[(1+(i-1)*nrow(X)/fold):(i*nrow(X)/fold),])
     y_test = Y[(1+(i-1)*nrow(X)/fold):(i*nrow(X)/fold)]
     
-    model = maboost(x = x_train, y = y_train, iter = 1, verbose = 1 ,nu = .1, C50tree = T, C5.0Control(CF = cf, minCase = mincases))
+    model = maboost(x = x_train, y = y_train, iter = 1, verbose = 0 ,nu = .1, C50tree = T, C5.0Control(CF = cf, minCase = mincases))
     
     pred = predict(model, x_test, type="class")
     
@@ -232,7 +233,7 @@ print(best_parameters_boosting) # row=26 and col=68
 best_cases <- best_parameters_boosting[2] + 2 - 1
 print(best_cases) # best_cases = 69
 best_CF <- best_parameters_boosting[1]*0.01 + 0.1
-print(best_CF) # best_CF = 0.36
+print(best_CF) # best_CF = 2.6
 print(min(errors)) # min(errors) = 2.992042
 print(errors)  # the errors don't seem to get better or worse with different parameters, so we just pick those best one
 # let's run a quick 10-fold cv with the best parameters
@@ -261,7 +262,7 @@ for (i in 1:fold) {
 }
 
 cv_error_boosting <- mean(cv_error_boosting)
-print(cv_error_boosting) # cv_error_boosting = 0.8968858
+print(cv_error_boosting) # cv_error_boosting = 0.9128028
 misclassification_matrix_boosting = matrix(0, num_degrees, num_degrees)
 
 for (i in 1:num_degrees) {
@@ -358,12 +359,50 @@ for (i in possible_eopchs){
 
 best_epochs <- which(errors == min(errors))           
 print(best_epochs)
-print(min(errors))                    # this is our best MAE in a 10-fold CV, the epochs were 15 and the errors 0.8864342
+print(min(errors))                    # this is our best error in a 10-fold CV, the epochs were 15 and the errors 0.8816017
 print(errors)
+
+# we now run a 10-fol cv 
+# in case you didn't run the optimization please run the following commented code:
+
+best_epochs <- 15
+
+fold = 10
+y_classified_NN <- rep(NA, length(Y_vector)) 
+
+for (i in 1:fold){
+  
+  X_k <- X_matrix[-((1 + (i-1)*nrow(X_matrix)/fold) : (i*nrow(X_matrix)/fold)),]
+  Y_k <- Y_categorized[-((1 + (i-1)*nrow(X_matrix)/fold) : (i*nrow(X_matrix)/fold)),]
+  X_test <- X_matrix[(1 + (i-1)*nrow(X_matrix)/fold) : (i*nrow(X_matrix)/fold),]
+  
+  model <- build_model()
+  
+  training <- model %>% fit(
+    X_k, Y_k, 
+    epochs = best_epochs, batch_size = 128,
+    validation.split = 0,
+    verbose =  1)
+  
+  pred <- model %>% predict_classes(X_test)
+  
+  y_classified_NN[(1 + (i-1)*nrow(X_matrix)/fold) : (i*nrow(X_matrix)/fold)] <- pred
+}
+
+cv_error_NN <- length(which(Y_vector != y_classified_NN+1))/length(Y_vector)
+print(cv_error_NN)
+
+misclassification_matrix_NN = matrix(0, length(unique(Y_vector)), length(unique(Y_vector)))
+for (i in 1:length(unique(Y_vector))) {
+  for (j in 1:length(unique(Y_vector))) {
+    misclassification_matrix_NN[i ,j] = length(which((Y_vector == i) & (y_classified_NN == j-1))) / length(which((Y_vector == i)))
+  }
+}
+print(misclassification_matrix_NN)
 
 # Let's use the best number of epochs to build a non-cv model that won't overfit
 # The reason for this is to save the weights, so that if you can't run keras you will still see some result
-# best_epochs = 8
+# best_epochs = 15
 
 model <- build_model()
 
@@ -373,20 +412,13 @@ training <- model %>% fit(
   validation.split = 0,
   verbose =  1)
 
-y_classified_NN<- model %>% predict_classes(X_matrix)
-cv_error_NN <- length(which(Y_vector != y_classified_NN))/length(Y_vector)
-print(cv_error_NN)          # we get a way smaller error than before (still substantial though), because we don't take the means twice
-
-misclassification_matrix_NN = matrix(0, num_degrees, num_degrees)
-for (i in 1:num_degrees) {
-  for (j in 1:num_degrees) {
-    misclassification_matrix_NN[i ,j] = length(which((Y_vector == i) & (y_classified_NN == j))) / length(which((Y_vector == i)))
-  }
-}
-print(misclassification_matrix_NN)
+y_classified_NN<- 1 + model %>% predict_classes(X_matrix)
+error <- length(which(Y_vector != y_classified_NN))/length(Y_vector)
+print(error)
 
 weights_reg <- model$get_weights()
 list.save(weights_reg, "Data/weights_reg.RData")
+
 
 # here we use the weights of the model to predict with matrix multiplication
 
@@ -402,10 +434,6 @@ Beta_output2 <- Beta[[6]]
 
 sigmoid = function(z) {
   x = 1/(1 + exp(z))
-}
-
-softmax = function(z){
-  x = exp(z) / sum(exp(z))
 }
 
 X <- cbind(rep(1, nrow(X_matrix)), X_matrix)
@@ -428,7 +456,7 @@ Pred <- t(Pred)
 Pred <- apply(Pred , 1, FUN=which.max)
 
 error_NN = cv_error_NN <- length(which(Y_vector != Pred))/length(Y_vector)
-print(error_NN)                                                           # the error stays the same
+print(error_NN)                                                           # the error are similar, they change a bit because of approximations
 
 #### We now quickly compare the results ####
 
@@ -593,7 +621,7 @@ library(caret)
 # 10-folds cross-validation with optimized parameters
 
 best_cases <- 69
-best_CF <- .36
+best_CF <- 0.36
 
 fold = 10
 y_classified_boosting <- rep(NA, length(Y_vector))
@@ -616,7 +644,7 @@ for (i in 1:fold) {
 }
 
 cv_error_boosting <- mean(cv_error_boosting)
-print(cv_error_boosting) # cv_error_boosting = 0.515917
+print(cv_error_boosting) # cv_error_boosting = 0.5460208
 misclassification_matrix_boosting = matrix(0, num_degrees, num_degrees)
 
 for (i in 1:num_degrees) {
