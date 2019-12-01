@@ -119,7 +119,7 @@ library(class)
 
 fold <- 10
 y_classified_knn <- rep(NA, nrow(X_matrix))
-k_best <- sqrt(nrow(X_matrix))
+k_best <- round(sqrt(nrow(X_matrix)),0)
 
 for (i in 1:fold){
   
