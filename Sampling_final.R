@@ -66,7 +66,7 @@ print(cv_error_log)
 misclassification_matrix_log = matrix(NA, num_degrees, num_degrees)
 for (i in 1:num_degrees) {
   for (j in 1:num_degrees) {
-    misclassification_matrix_log[i, j] = length(which((Y_vector == i) & (y_classified == j))) / length(which((Y_vector == i)))
+    misclassification_matrix_log[i, j] = length(which((Y_vector == i) & (y_classified_log == j))) / length(which((Y_vector == i)))
   }
 }
 
