@@ -94,7 +94,7 @@ library(class)
 # k_best = 54
 
 # DISCLAIMER: we noticed that with the knn() function there's a bit of randomness involved, which even by setting a seed 
-# doesn't disappear, therefore you can expect slightly different results than ours
+# doesn't disappear, therefore you can expect slightly different error results than ours
 
 optim_knn <- function(K, X, Y){
   
@@ -626,7 +626,6 @@ for (i in 1:num_degrees) {
 }
 
 print(misclassification_matrix_boosting)
-cv_error_boosting <- mean(error_boosting)
 
 #### last but not least we train a neural network ####
 
