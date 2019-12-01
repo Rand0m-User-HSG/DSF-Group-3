@@ -216,6 +216,7 @@ print(variables_LASSO)
 # we run a linear regression using only the variables that survived the LASSO selection
 # we test our results by performing a leave-one-out (LOO) cross-validation 
 
+dataset_reg <- data.frame(cbind(Y_vector, X_matrix))
 fold_LOO = nrow(dataset_reg)
 betas_LOO_cv_LASSO_lin_reg = matrix(0, nrow = nrow(variables_LASSO), ncol = fold_LOO)
 pred = rep(0, fold_LOO)
