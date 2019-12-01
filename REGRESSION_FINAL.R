@@ -201,7 +201,7 @@ model_LASSO_LOO_cv$cvm[model_LASSO_LOO_cv$lambda == model_LASSO_LOO_cv$lambda.1s
 # MSE = 9.824736
 
 pred_lasso <- predict(model_LASSO_LOO_cv, X_matrix)
-MAE_lasso_cv <- mean(abs(Y_vector - pred))
+MAE_lasso_cv <- mean(abs(Y_vector - pred_lasso))
 
 print(MAE_lasso_cv)
 # Find the associated variables that survived variable selection
