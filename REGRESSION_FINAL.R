@@ -204,6 +204,7 @@ pred_lasso <- predict(model_LASSO_LOO_cv, X_matrix)
 MAE_lasso_cv <- mean(abs(Y_vector - pred_lasso))
 
 print(MAE_lasso_cv)
+# 2.42852
 # Find the associated variables that survived variable selection
 variables_LASSO = coef(model_LASSO_LOO_cv, s="lambda.1se") %>% 
   broom:::tidy.dgCMatrix()
