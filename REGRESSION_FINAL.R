@@ -196,6 +196,10 @@ model_LASSO_LOO_cv$lambda.1se
 
 # model_LASSO_LOO_cv$lambda.1se = 0.1423201
 
+# Find the associated MSE
+model_LASSO_LOO_cv$cvm[model_LASSO_LOO_cv$lambda == model_LASSO_LOO_cv$lambda.1se] 
+# MSE = 9.824736
+
 # Find the associated variables that survived variable selection
 variables_LASSO = coef(model_LASSO_LOO_cv, s="lambda.1se") %>% 
   broom:::tidy.dgCMatrix()
