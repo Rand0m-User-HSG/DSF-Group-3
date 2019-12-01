@@ -121,7 +121,7 @@ for (i in 1:num_degrees) {
 }
 print(misclassification_matrix_boosting)
 
-############################################################## time for logistic regression
+############################################################## time for knn
 library(class)
 
 fold <- 10
