@@ -38,7 +38,7 @@ for (i in 1:fold) {
   
   x_test = X_matrix[lower_bound_i:upper_bound_i, ]
   y_test = Y_vector[lower_bound_i:upper_bound_i]
-
+  
   x_train = X_matrix[-(lower_bound_i:upper_bound_i), ]
   y_train = Y_vector[-(lower_bound_i:upper_bound_i)]
   # the X_matrix and Y_vector of everything that is not fold i (i.e. 9/10 of X_matrix and Y_vector)  
@@ -85,10 +85,9 @@ library(class)
 # we optimized over it.
 # For choosing the range over which to optimize, we first started with the rule of thumb that k = sqrt(nrow(X_matrix)),
 # then we took an intervall of +/- sqrt(k) to get our optimization range.
-# The k which resulted in the smallest error was k = ***.
-# As it takes quite some time to run the optimization, feel free to skip this part after running the following:
-# k_best = 233
+# Sadly this optimization took too much time and therefore we coudn't run it. We opted for simply taking k = sqrt(nrow(X_matrix))
 
+"""
 optim_knn <- function(K, X, Y){
   fold <- 10
   cv_error <- rep(NA, fold)
@@ -111,7 +110,7 @@ optim_knn <- function(K, X, Y){
   return(errors)
 }
 
-possible_k <- 210:250
+possible_k <- 217:249
 error <- rep(NA, length(possible_k))
 index = 0
 
@@ -120,12 +119,16 @@ for (i in possible_k){
   error[index] <- optim_knn(i, X_matrix, Y_vector)
 }
 
-k_best <- which(error == min(error)) + 210 -1
+k_best <- which(error == min(error)) + 217 -1
 print(k_best)
 cv_error_knn = min(error)
 print(cv_error_knn)
+"""
 
-# We now run a 10-fold cv with the best k we found in the optimization
+# We now run a 10-fold cv with the best k we found in the optimization,
+# or in our case with k = 233. If you haven't run the optimization please run the following commented code:
+
+k_best = round(sqrt(nrow(X_matrix)), 0)
 
 fold <- 10
 cv_error_knn <- rep(NA, fold)
@@ -138,20 +141,20 @@ for (i in 1:fold){
   X_test <- X_matrix[(1 + (i-1)*nrow(X_matrix)/fold) : (i*(nrow(X_matrix)/fold)),]
   Y_test <- Y_vector[(1 + (i-1)*nrow(X_matrix)/fold) : (i*(nrow(X_matrix)/fold))]
   
-  pred <- as.numeric(knn(X_k, X_test, cl = Y_k, k = 9))
+  pred <- as.numeric(knn(X_k, X_test, cl = Y_k, k = k_best))
   
   y_classified_knn[(1 + (i-1)*nrow(X_matrix)/fold) : (i*(nrow(X_matrix)/fold))] <- pred
-  cv_error_knn[i] <- length(which(Y_test - pred))/length(Y_test)
+  cv_error_knn[i] <- length(which(Y_test != pred))/length(Y_test)
   
 }
 
 cv_error_knn <- mean(cv_error_knn)
-print(cv_error_knn)  # we get an error of .2362498
+print(cv_error_knn)  # we get an error of .2142199
 
 misclassification_matrix_knn = matrix(0, length(unique(Y_vector)), length(unique(Y_vector)))
 for (i in 1:length(unique(Y_vector))) {
-  for (j in 1:length(unique(Y_vector)))) {
-    misclassification_matrix_knn[i ,j] = length(which((Y_vector == i) & (y_classified_knn == j))) / length(which((Y_vector == i)))
+  for (j in 1:length(unique(Y_vector))) {
+    misclassification_matrix_knn[i ,j] = length(which((Y_vector == i) & (y_classified_knn == j))) / length(which(Y_vector == i))
   }
 }
 print(misclassification_matrix_knn)
@@ -216,17 +219,19 @@ for (k in min_cases){
 }
 
 best_parameters_boosting <- which(errors == min(errors), arr.ind = T)
-print(best_parameters_boosting)
-best_cases <- best_parameters_boosting[2] + 2 - 1
+print(best_parameters_boosting)  # we have different combinations of parameters that find the same minimal error, wr pick the first pair
+best_cases <- best_parameters_boosting[1, 2] + 2 - 1
 print(best_cases)
-best_CF <- best_parameters_boosting[1]/10
+best_CF <- best_parameters_boosting[1, 1]/10
 print(best_CF)
 print(min(errors))
+print(errors)
 
 # let's run a quick 10-fold cv with the best parameters
-# If you skipped the optimization please run this 2 lines:
-# best_cases <- 4
-# best_CF <- .5
+# If you skipped the optimization please run the following 2 commented lines:
+
+# best_cases <- 2
+# best_CF <- .2
 
 fold = 10
 y_classified_boosting <- rep(NA, length(Y_vector))
@@ -244,21 +249,21 @@ for (i in 1:fold) {
   pred = predict(model, x_test, type="class")
   
   y_classified_boosting[(1+(i-1)*nrow(X_matrix)/fold):(i*nrow(X_matrix)/fold)] <- pred
-  error_boosting[i] <- length(which(y_test - as.double(pred)))/length(y_test)
+  error_boosting[i] <- length(which(y_test != as.double(pred)))/length(y_test)
   
 }
 
-misclassification_matrix_boosting = matrix(0, length(unique(Y_vector), length(unique(Y_vector))))
+misclassification_matrix_boosting = matrix(0, length(unique(Y_vector)), length(unique(Y_vector)))
 
-for (i in 1:length(unique(Y_vector)) {
-  for (j in 1:length(unique(Y_vector)) {
+for (i in 1:length(unique(Y_vector))) {
+  for (j in 1:length(unique(Y_vector))) {
     misclassification_matrix_boosting[i ,j] = length(which((Y_vector == i) & (y_classified_boosting == j))) / length(which((Y_vector == i)))
   }
 }
 
 print(misclassification_matrix_boosting)
 cv_error_boosting <- mean(error_boosting)
-print(cv_error_boosting) # cv_error_boosting = 0.2251428
+print(cv_error_boosting) # cv_error_boosting = 0.2143489
 
 
 #### last but not least we train a neural network ####
@@ -324,21 +329,21 @@ optim_NN <- function(e, X, Y){
       X_k, Y_k, 
       epochs = e, batch_size = 128,
       validation.split = 0,
-      verbose =  0)
+      verbose =  1)
     
-    pred <- model %>% predict(X_test)
+    pred <- model %>% predict_classes(X_test)
     
-    cv_error[i] <- length(which(Y_vector[(1 + (i-1)*nrow(X)/fold) : (i*nrow(X)/fold)] != pred))
+    cv_error[i] <- length(which(Y_vector[(1 + (i-1)*nrow(X)/fold) : (i*nrow(X)/fold)] != pred+1))/length(pred)
     
   }
   
-  return(sum(cv_error)/length(Y_vector))
+  return(mean(cv_error))
 }
 
 # since we're training the model with a validation.split of 0, we risk overfitting it, so we search for the epochs,
 # which get the smallest MAE on unseen data
 
-possible_eopchs = 1:15
+possible_eopchs = 1:5
 errors <- rep(NA, length(possible_eopchs))
 for (i in possible_eopchs){
   errors[i] <- optim_NN(i, X_matrix, Y_categorized)   # Depending on your machine you may see a warning, it doesn't matter for us
@@ -346,13 +351,50 @@ for (i in possible_eopchs){
 
 best_epochs <- which(errors == min(errors))           
 print(best_epochs)
-cv_error_NN <- mean(errors)                    # this is our best MAE in a 10-fold CV, the epochs were 4 and the MAE .1704369
-print(cv_error_NN)                             # we used predict instead of predict_classes to keep the probabilities, so the next MAE will be bigger
+print(errors)      
+best_epochs <- 2  # for all epochs the error stays the same, so we pick 2 for good measure                        
 
+# we now run a 10-fol cv 
+# in case you didn't run the optimization please run the following commented code:
+
+# best_epochs <- 2
+
+fold = 10
+y_classified_NN <- rep(NA, length(Y_vector)) 
+
+for (i in 1:fold){
+  
+  X_k <- X_matrix[-((1 + (i-1)*nrow(X_matrix)/fold) : (i*nrow(X_matrix)/fold)),]
+  Y_k <- Y_categorized[-((1 + (i-1)*nrow(X_matrix)/fold) : (i*nrow(X_matrix)/fold)),]
+  X_test <- X_matrix[(1 + (i-1)*nrow(X_matrix)/fold) : (i*nrow(X_matrix)/fold),]
+
+  model <- build_model()
+  
+  training <- model %>% fit(
+    X_k, Y_k, 
+    epochs = best_epochs, batch_size = 128,
+    validation.split = 0,
+    verbose =  1)
+  
+  pred <- model %>% predict_classes(X_test)
+  
+  y_classified_NN[(1 + (i-1)*nrow(X_matrix)/fold) : (i*nrow(X_matrix)/fold)] <- pred
+}
+
+cv_error_NN <- length(which(Y_vector != y_classified_NN+1))/length(Y_vector)
+print(cv_error_NN)
+
+misclassification_matrix_NN = matrix(0, length(unique(Y_vector)), length(unique(Y_vector)))
+for (i in 1:length(unique(Y_vector))) {
+  for (j in 1:length(unique(Y_vector))) {
+    misclassification_matrix_NN[i ,j] = length(which((Y_vector == i) & (y_classified_NN == j-1))) / length(which((Y_vector == i)))
+  }
+}
+print(misclassification_matrix_NN)
 
 # Let's use the best number of epochs to build a non-cv model that won't overfit
 # The reason for this is to save the weights, so that if you can't run keras you will still see some result
-# best_epochs = 4
+# best_epochs = 2
 
 model <- build_model()
 
@@ -365,14 +407,6 @@ training <- model %>% fit(
 y_classified_NN<- 1 + model %>% predict_classes(X_matrix)
 error <- length(which(Y_vector != y_classified_NN))/length(Y_vector)
 print(error)
-
-misclassification_matrix_NN = matrix(0, length(unique(Y_vector), length(unique(Y_vector))))
-for (i in 1:length(unique(Y_vector))) {
-  for (j in 1:length(unique(Y_vector)) {
-    misclassification_matrix_NN[i ,j] = length(which((Y_vector == i) & (y_classified_NN == j))) / length(which((Y_vector == i)))
-  }
-}
-print(misclassification_matrix_NN)
 
 weights_reg <- model$get_weights()
 list.save(weights_reg, "Data/weights_reg.RData")
@@ -400,24 +434,24 @@ softmax = function(z){
 X <- cbind(rep(1, nrow(X_matrix)), X_matrix)
 Beta_input_true <- cbind(Beta_input2, t(Beta_input))
 
-Input_layer <- Beta_input_true %*% sigmoid(t(X))
+Input_layer <- sigmoid(Beta_input_true %*% t(X))
 
 Input_layer <- t(Input_layer)
 Input_layer<- cbind(rep(1, nrow(Input_layer)), Input_layer)
 Beta_hidden_true <- cbind(Beta_hidden2, t(Beta_hidden))
 
-Hidden_layer <- Beta_hidden_true %*% sigmoid(t(Input_layer))
+Hidden_layer <- sigmoid(Beta_hidden_true %*% t(Input_layer))
 
 Hidden_layer <- t(Hidden_layer)
 Hidden_layer <- cbind(rep(1, nrow(Hidden_layer)), Hidden_layer)
 Beta_output_true <- cbind(Beta_output2, t(Beta_output))
 
-Pred <- Beta_output_true %*% softmax(t(Hidden_layer))
+Pred <- softmax(Beta_output_true %*% t(Hidden_layer))
 Pred <- t(Pred)
 Pred <- apply(Pred , 1, FUN=which.max)
 
 cv_error_NN = length(which(Y_vector != Pred))/length(Y_vector)
-print(error_NN)                                                           # the error stays the same
+print(cv_error_NN)                                                           # the error stays the same
 
 
 
@@ -439,7 +473,7 @@ print(misclassification_matrix_boosting)
 print("The misclassificaiton matrix of the neural network:")
 print(misclassification_matrix_NN)
 
-# As expected the NN performs better, followed close by boosting.
+# As expected the NN performs better, but also the knn nails the same performance, closelyfollowed close by boosting.
 # That said our models coudn't find a "real" way to predict the severity of the accident,
 # instead they all started predicting every accident to be a light injury, that is a class number 3.
 # The reasons for this can be various:
