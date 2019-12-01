@@ -89,9 +89,9 @@ library(class)
 # we optimized over it.
 # For choosing the range over which to optimize, we first started with the rule of thumb that k = sqrt(nrow(X_matrix)),
 # then we took an intervall of +/- sqrt(k) to get our optimization range.
-# The k which resulted in the smallest error was k = ***.
+# The k which resulted in the smallest error was k = 54.
 # As it takes quite some time to run the optimization, feel free to skip this part after running the following:
-# k_best = 233
+# k_best = 54
 
 # DISCLAIMER: we noticed that with the knn() function there's a bit of randomness involved, which even by setting a seed 
 # doesn't disappear, therefore you can expect slightly different results than ours
@@ -158,7 +158,7 @@ for (i in 1:fold){
 }
 
 cv_error_knn <- mean(cv_error_knn)
-print(cv_error_knn) # cv_error_knn = 0.8795848
+print(cv_error_knn) # cv_error_knn = 0.8809689 (remember our disclaimer that there is some randomness involved, see comments at the beginning of the knn section)
 
 misclassification_matrix_knn = matrix(0, num_degrees, num_degrees)
 for (i in 1:num_degrees) {
@@ -237,8 +237,8 @@ print(min(errors)) # min(errors) = 2.992042
 print(errors)  # the errors don't seem to get better or worse with different parameters, so we just pick those best one
 # let's run a quick 10-fold cv with the best parameters
 # If you skipped the optimization please run this 2 lines:
-# best_cases <- 4
-# best_CF <- .5
+# best_cases <- 69
+# best_CF <- 2.6
 
 fold = 10
 y_classified_boosting <- rep(NA, length(Y_vector))
@@ -260,8 +260,8 @@ for (i in 1:fold) {
   
 }
 
-cv_error_boosting <- mean(error_boosting)
-print(cv_error_boosting)
+cv_error_boosting <- mean(cv_error_boosting)
+print(cv_error_boosting) # cv_error_boosting = 0.8968858
 misclassification_matrix_boosting = matrix(0, num_degrees, num_degrees)
 
 for (i in 1:num_degrees) {
