@@ -523,7 +523,7 @@ for (i in 1:fold) {
 }
 
 cv_error_log = length(which(Y_vector != y_classified_log))/length(Y_vector)
-print(cv_error_log)
+print(cv_error_log) # cv_error_log = 0.4684156
 
 misclassification_matrix_log = matrix(0, num_degrees, num_degrees)
 for (i in 1:num_degrees) {
@@ -563,7 +563,7 @@ for (i in 1:fold){
 }
 
 cv_error_knn <- mean(cv_error_knn)
-print(cv_error_knn)
+print(cv_error_knn) # cv_error_knn = 0.4602076
 
 misclassification_matrix_knn = matrix(0, num_degrees, num_degrees)
 for (i in 1:num_degrees) {
@@ -592,8 +592,8 @@ library(caret)
 
 # 10-folds cross-validation with optimized parameters
 
-best_cases <- 4
-best_CF <- .5
+best_cases <- 69
+best_CF <- 2.6
 
 fold = 10
 y_classified_boosting <- rep(NA, length(Y_vector))
@@ -616,7 +616,7 @@ for (i in 1:fold) {
 }
 
 cv_error_boosting <- mean(cv_error_boosting)
-print(cv_error_boosting)
+print(cv_error_boosting) # cv_error_boosting = 0.515917
 misclassification_matrix_boosting = matrix(0, num_degrees, num_degrees)
 
 for (i in 1:num_degrees) {
