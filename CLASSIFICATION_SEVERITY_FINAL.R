@@ -248,7 +248,7 @@ for (i in 1:fold) {
   
 }
 
-misclassification_matrix_boosting = matrix(0, length(unique(Y_vector), length(unique(Y_vector))
+misclassification_matrix_boosting = matrix(0, length(unique(Y_vector), length(unique(Y_vector))))
 
 for (i in 1:length(unique(Y_vector)) {
   for (j in 1:length(unique(Y_vector)) {
@@ -366,7 +366,7 @@ y_classified_NN<- 1 + model %>% predict_classes(X_matrix)
 error <- length(which(Y_vector != y_classified_NN))/length(Y_vector)
 print(error)
 
-misclassification_matrix_NN = matrix(0, length(unique(Y_vector), length(unique(Y_vector))
+misclassification_matrix_NN = matrix(0, length(unique(Y_vector), length(unique(Y_vector))))
 for (i in 1:length(unique(Y_vector))) {
   for (j in 1:length(unique(Y_vector)) {
     misclassification_matrix_NN[i ,j] = length(which((Y_vector == i) & (y_classified_NN == j))) / length(which((Y_vector == i)))
