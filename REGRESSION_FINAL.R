@@ -173,7 +173,7 @@ MAE_lin_reg_LOO_cv_interaction = mean(MAEs_lin_reg_LOO_cv_interaction)
 print(c(MSE_lin_reg_LOO_cv_interaction, MAE_lin_reg_LOO_cv_interaction))
 
 # MSE_lin_reg_LOO_cv_interaction = 9.475186 (MSE_lin_reg_LOO_cv = 9.514310)
-# MAE_LOO_cv_interaction =  2.392221 (MAE_lin_reg_LOO_cv = 2.395987)
+# MAE_lin_reg_LOO_cv_interaction =  2.392221 (MAE_lin_reg_LOO_cv = 2.395987)
 
 # Incorporating interaction effects slightly reduces MSE and MAE.
 
@@ -194,7 +194,7 @@ model_LASSO_LOO_cv <- cv.glmnet(x=X_matrix, y=Y_vector, nfolds = nrow(X_matrix),
 # Find the best lambda, using the "one-standard-deviation" rule
 model_LASSO_LOO_cv$lambda.1se
 
-#model_LASSO_LOO_cv$lambda.1se = 0.1423201
+# model_LASSO_LOO_cv$lambda.1se = 0.1423201
 
 # Find the associated variables that survived variable selection
 variables_LASSO = coef(model_LASSO_LOO_cv, s="lambda.1se") %>% 
@@ -260,7 +260,6 @@ print(c(MSE_LASSO_lin_reg_LOO_cv, MAE_LASSO_lin_reg_LOO_cv))
 
 # install.packages("gbm")
 # install.packages("caret")
-# install.packages("doParallel")
 
 library(gbm)
 
@@ -321,13 +320,13 @@ MAE_boosting <- mean(MAE_boosting)
 print(MSE_boosting)
 print(MAE_boosting)
 
-#optimization: n.trees = 101:
-#MSE_boosting = 8.733491
-#MAE_boosting = 2.313302
+# Optimization: n.trees = 101:
+# MSE_boosting = 8.733491
+# MAE_boosting = 2.313302
 
-#no optimization: n.trees = 3000: 
-#MSE_boosting = 5.017046
-#MAE_boosting = 1.752591
+# No optimization: n.trees = 3000: 
+# MSE_boosting = 5.017046
+# MAE_boosting = 1.752591
 
 #### NEURAL NETWORK - Introduction ####
 
