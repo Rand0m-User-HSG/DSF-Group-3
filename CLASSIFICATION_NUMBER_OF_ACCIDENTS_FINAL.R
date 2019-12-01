@@ -228,12 +228,12 @@ for (k in min_cases){
 }
 
 best_parameters_boosting <- which(errors == min(errors), arr.ind = T)
-print(best_parameters_boosting)
+print(best_parameters_boosting) # row=26 and col=68
 best_cases <- best_parameters_boosting[2] + 2 - 1
-print(best_cases)
+print(best_cases) # best_cases = 69
 best_CF <- best_parameters_boosting[1]/10
-print(best_CF)
-print(min(errors))
+print(best_CF) # best_CF = 2.6
+print(min(errors)) # min(errors) = 2.992042
 print(errors)  # the errors don't seem to get better or worse with different parameters, so we just pick those best one
 # let's run a quick 10-fold cv with the best parameters
 # If you skipped the optimization please run this 2 lines:
