@@ -109,7 +109,7 @@ print(cv_error_boosting)
 misclassification_matrix_boosting = matrix(0, num_degrees, num_degrees)
 for (i in 1:num_degrees) {
   for (j in 1:num_degrees) {
-    misclassification_matrix_boosting[j ,i] = length(which((Y_vector == j) & (y_classified == i))) / length(which((Y_vector == j)))
+    misclassification_matrix_boosting[j ,i] = length(which((Y_vector == j) & (y_classified_boosting == i))) / length(which((Y_vector == j)))
   }
 }
 print(misclassification_matrix_boosting)
@@ -140,7 +140,7 @@ print(mean(cv_error_knn))
 misclassification_matrix_knn = matrix(0, num_degrees, num_degrees)
 for (i in 1:num_degrees) {
   for (j in 1:num_degrees) {
-    misclassification_matrix_knn[j ,i] = length(which((Y_vector == j) & (y_classified == i))) / length(which((Y_vector == j)))
+    misclassification_matrix_knn[j ,i] = length(which((Y_vector == j) & (y_classified_knn == i))) / length(which((Y_vector == j)))
   }
 }
 print(misclassification_matrix_knn)
