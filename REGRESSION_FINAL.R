@@ -52,8 +52,9 @@ errors_lin_reg = dataset_reg %>%
             MAE_lin_reg = mean(abs(Y_vector - pred)))
 print(errors_lin_reg)
 
-# MSE_lin_reg = 9.362053
-# MAE_lin_reg = 2.376562
+# MSE_lin_reg = 9.362024
+# MAE_lin_reg = 2.37656
+
 
 
 #### LINEAR REGRESSION - No interaction effects - LOO cv ####
@@ -97,8 +98,8 @@ MAE_lin_reg_LOO_cv = mean(MAEs_lin_reg_LOO_cv)
 
 print(c(MSE_lin_reg_LOO_cv, MAE_lin_reg_LOO_cv))
 
-# MSE_lin_reg_LOO_cv = 9.514341 (MSE_lin_reg = 9.362053)
-# MAE_lin_reg_LOO_cv = 2.395989(MAE_lin_reg = 2.376562)
+# MSE_lin_reg_LOO_cv = 9.514310 (MSE_lin_reg = 9.362024)
+# MAE_lin_reg_LOO_cv = 2.395987 (MAE_lin_reg = 2.37656)
 
 # Getting slightly higher MSE and MAE cross-validation errors is normal, because they
 # correspond to "testing" errors, unlike the errors from the previous section which were
@@ -126,8 +127,8 @@ errors_lin_reg_interaction = dataset_reg %>%
             MAE_lin_reg_interaction = mean(abs(Y_vector - pred)))
 print(errors_lin_reg_interaction)
 
-# MSE_lin_reg_interaction = 9.254047 (MSE_lin_reg = 9.362053)
-# MAE_lin_reg_interaction = 2.364247 (MAE_lin_reg = 2.376562)
+# MSE_lin_reg_interaction = 9.254078 (MSE_lin_reg = 9.362024)
+# MAE_lin_reg_interaction = 2.364248 (MAE_lin_reg = 2.37656)
 
 # Incorporating interaction effects slightly reduces MSE and MAE.
 
@@ -171,8 +172,8 @@ MAE_lin_reg_LOO_cv_interaction = mean(MAEs_lin_reg_LOO_cv_interaction)
 
 print(c(MSE_lin_reg_LOO_cv_interaction, MAE_lin_reg_LOO_cv_interaction))
 
-# MSE_lin_reg_LOO_cv_interaction = 9.475153 (MSE_lin_reg_LOO_cv = 9.514341)
-# MAE_LOO_cv_interaction =  2.39222 (MAE_lin_reg_LOO_cv = 2.395989)
+# MSE_lin_reg_LOO_cv_interaction = 9.475186 (MSE_lin_reg_LOO_cv = 9.514310)
+# MAE_LOO_cv_interaction =  2.392221 (MAE_lin_reg_LOO_cv = 2.395987)
 
 # Incorporating interaction effects slightly reduces MSE and MAE.
 
@@ -192,6 +193,8 @@ model_LASSO_LOO_cv <- cv.glmnet(x=X_matrix, y=Y_vector, nfolds = nrow(X_matrix),
 
 # Find the best lambda, using the "one-standard-deviation" rule
 model_LASSO_LOO_cv$lambda.1se
+
+#model_LASSO_LOO_cv$lambda.1se = 0.1423201
 
 # Find the associated variables that survived variable selection
 variables_LASSO = coef(model_LASSO_LOO_cv, s="lambda.1se") %>% 
@@ -247,8 +250,8 @@ MAE_LASSO_lin_reg_LOO_cv = mean(MAEs_LASSO_lin_reg_LOO_cv)
 
 print(c(MSE_LASSO_lin_reg_LOO_cv, MAE_LASSO_lin_reg_LOO_cv))
 
-# MSE_LASSO_lin_reg_LOO_cv = 9.590648 (MSE_lin_reg_LOO_cv = 9.514341)
-# MAE_LASSO_lin_reg_LOO_cv = 2.404960 (MAE_lin_reg_LOO_cv = 2.395989)
+# MSE_LASSO_lin_reg_LOO_cv = 9.590648 (MSE_lin_reg_LOO_cv = 9.514310)
+# MAE_LASSO_lin_reg_LOO_cv = 2.404960 (MAE_lin_reg_LOO_cv = 2.395987)
 
 
 #### BOOSTING - Introduction ####
@@ -286,7 +289,7 @@ best_trees <- 99 + which(error == min(error))
 print(best_trees)
 print(min(error))
 
-# we found the best parameter n.trees = *****, if you didn't optimize please run:
+# we found the best parameter n.trees = 101, if you didn't optimize please run:
 # best_trees = 3000
 
 # we now run a 10-fold cv with the best parameters
@@ -317,6 +320,14 @@ MSE_boosting <- mean(MSE_boosting)
 MAE_boosting <- mean(MAE_boosting)
 print(MSE_boosting)
 print(MAE_boosting)
+
+#optimization: n.trees = 101:
+#MSE_boosting = 8.733491
+#MAE_boosting = 2.313302
+
+#no optimization: n.trees = 3000: 
+#MSE_boosting = 5.017046
+#MAE_boosting = 1.752591
 
 #### NEURAL NETWORK - Introduction ####
 
