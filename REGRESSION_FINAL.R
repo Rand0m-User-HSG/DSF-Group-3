@@ -357,9 +357,6 @@ MAE_boosting <- mean(MAE_boosting)
 print(MSE_boosting)
 print(MAE_boosting)
 
-# Optimization: n.trees = 101:
-# MSE_boosting = 8.733491
-# MAE_boosting = 2.313302
 
 # No optimization: n.trees = 3000: 
 # MSE_boosting = 5.017046
