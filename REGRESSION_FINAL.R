@@ -115,10 +115,10 @@ print(c(MSE_lin_reg_LOO_cv, MAE_lin_reg_LOO_cv))
 
 # we first perform the linear regression
 model_lin_reg_interaction = lm(Y_vector ~ . + Temp*Pressure + Temp*Humidity + Temp*Prec_amount + Temp*Wind_Spd
-               + Pressure*Humidity + Pressure*Prec_amount + Pressure*Wind_Spd
-               + Humidity*Prec_amount + Humidity*Wind_Spd
-               + Prec_amount*Wind_Spd,
-               data = dataset_reg)
+                               + Pressure*Humidity + Pressure*Prec_amount + Pressure*Wind_Spd
+                               + Humidity*Prec_amount + Humidity*Wind_Spd
+                               + Prec_amount*Wind_Spd,
+                               data = dataset_reg)
 
 # and we calculate the associated MSE and MAE
 errors_lin_reg_interaction = dataset_reg %>%
@@ -151,10 +151,10 @@ for (i in 1:fold_LOO){
   y_vector_i = dataset_reg_cv_i[, 1]
   
   model_lin_reg_interaction_LOO_cv = lm(Y_vector ~ . + Temp*Pressure + Temp*Humidity + Temp*Prec_amount + Temp*Wind_Spd
-                    + Pressure*Humidity + Pressure*Prec_amount + Pressure*Wind_Spd
-                    + Humidity*Prec_amount + Humidity*Wind_Spd
-                    + Prec_amount*Wind_Spd,
-                    data = dataset_reg_cv_non_i)
+                                        + Pressure*Humidity + Pressure*Prec_amount + Pressure*Wind_Spd
+                                        + Humidity*Prec_amount + Humidity*Wind_Spd
+                                        + Prec_amount*Wind_Spd,
+                                        data = dataset_reg_cv_non_i)
   
   dataset_reg_cv_i_with_pred = dataset_reg_cv_i %>%
     add_predictions(model_lin_reg_interaction_LOO_cv)
@@ -200,6 +200,10 @@ model_LASSO_LOO_cv$lambda.1se
 model_LASSO_LOO_cv$cvm[model_LASSO_LOO_cv$lambda == model_LASSO_LOO_cv$lambda.1se] 
 # MSE = 9.824736
 
+pred_lasso <- predict(model_LASSO_LOO_cv, X_matrix)
+MAE_lasso_cv <- mean(abs(Y_vector - pred))
+
+print(MAE_lasso_cv)
 # Find the associated variables that survived variable selection
 variables_LASSO = coef(model_LASSO_LOO_cv, s="lambda.1se") %>% 
   broom:::tidy.dgCMatrix()
@@ -258,6 +262,7 @@ print(c(MSE_LASSO_lin_reg_LOO_cv, MAE_LASSO_lin_reg_LOO_cv))
 # MAE_LASSO_lin_reg_LOO_cv = 2.404960 (MAE_lin_reg_LOO_cv = 2.395987)
 
 
+
 #### BOOSTING - Introduction ####
 
 # We now perform a generalized a boosted regresion model 
@@ -267,33 +272,61 @@ print(c(MSE_LASSO_lin_reg_LOO_cv, MAE_LASSO_lin_reg_LOO_cv))
 
 library(gbm)
 
-optim_boosting<- function(trees, X, Y){
+optim_boosting<- function(depth, trees, X, Y){
   
   fold = 10
   X <- data.frame(X)
   Y <- as.double((Y))
   
   model_gbm = gbm(Y ~., data = X, distribution = "gaussian", shrinkage = .1, n.trees = trees, 
-                  interaction.depth = 2, cv.folds = fold)
+                  interaction.depth = depth, cv.folds = fold)
   
   pred <- model_gbm$fit
   
   return(mean(abs(Y_vector - pred)))
 }
 
-possible_trees <- 100:101
-error <- rep(NA, length(possible_trees))
+# To optimize this function there're a lot of values we could try, as the number of trees (= n.trees) cna be really big > 10k
+# We found out that the optimal number is usually between 3 000 and 10 000 trees, but it's still quite a big range.
+# To shrink down the possibilities we start measuring the errors for every thousand trees and tehn we take a range
+# around the best number.
 
-for (j in possible_trees){
-  error[j-99] <- optim_boosting(j, X_matrix, Y_vector)
+# 3000 --> 2.171638
+# 4000 --> 2.140644
+# 5000 --> 2.119288
+# 6000 --> 2.093422
+# 7000 --> 2.07393
+# 8000 --> 2.031408
+# 9000 --> 2.030103
+# 10000 --> 2.032644
+
+# It seems that around 9 000 we're gonna find the smallest error, so now we'll search for a range or +/- 100 around it,
+# while also modifying the intercation.depth
+
+possible_depth <- 1:5
+possible_trees <- 8990:9010
+
+col = 0
+error <- matrix(NA, nrow = length(possible_trees), ncol = length(possible_depth))
+                
+for (k in possible_depth){
+  col = col +1
+  row = 0
+  for (j in possible_trees){
+    row = row +1
+    error[row, col] <- optim_boosting(k, j, X_matrix, Y_vector)
+  }
 }
 
-best_trees <- 99 + which(error == min(error))
-print(best_trees)
+best_parameters <- which(error == min(error), arr.ind = T)
+print(best_parameters)
+best_trees <- best_parameters[]
+best_depth <- best_parameters[]
 print(min(error))
 
-# we found the best parameter n.trees = 101, if you didn't optimize please run:
+# We'll now run a 10-fol cv for boosting with the optimized parameters, so if you didn't optimize please run the following commented code:
 # best_trees = 3000
+# best_depth = 2
 
 # we now run a 10-fold cv with the best parameters
 
@@ -309,7 +342,7 @@ for (i in 1:fold){
   Y_test <- as.double(Y_vector[(1 + (i-1)*nrow(X_matrix)/fold) : (i*nrow(X_matrix)/fold)])
   
   model <- gbm(Y_k ~., data = X_k, distribution = "gaussian", shrinkage = .1, n.trees = best_trees, 
-                           interaction.depth = 2)
+               interaction.depth = best_depth)
   
   pred <- predict(model, X_test, n.trees = best_trees)
   
@@ -414,7 +447,7 @@ optim_NN <- function(e, X, Y){
 # since we're training the model with a validation.split of 0, we risk overfitting it, so we search for the epochs,
 # which get the smallest MAE on unseen data
 
-possible_epochs = 1:5
+possible_epochs = 1:50
 errors <- rep(NA, length(possible_epochs))
 for (i in possible_epochs){
   errors[i] <- optim_NN(i, X_matrix, Y_vector)
@@ -422,9 +455,10 @@ for (i in possible_epochs){
 
 best_epochs <- which(errors == min(errors))
 print(best_epochs)
-print(errors) # this is our best MAE in a 10-fold CV, the epochs were 48 and the MAE 2.29541
+print(errors) # this is our best MAE in a 10-fold CV, the epochs were 48 and the MAE 2.444938
+# If you haven't run the optimization, please run the following commented code:
 
-best_epochs = 5
+# best_epochs = 48
 
 fold <- 10
 MAE_NN<- rep(NA, fold)
@@ -454,8 +488,8 @@ for (i in 1:fold){
 
 MSE_NN <- mean(MSE_NN)
 MAE_NN <- mean(MAE_NN)
-print(MSE_NN)
-print(MAE_NN)
+print(MSE_NN)    # 9.71945
+print(MAE_NN)    # 2.444938
 
 #### NEURAL NETWORK - Model with the best epochs ####
 
@@ -471,7 +505,7 @@ training <- model %>% fit(
 
 pred <- model %>% predict(X_matrix)
 MAE <- mean(abs(Y_vector - pred))
-print(MAE)
+print(MAE)  # MAE of 2.302467 
 
 weights_reg <- model$get_weights()
 list.save(weights_reg, "Data/weights_reg.RData")
@@ -510,4 +544,4 @@ Pred <- sigmoid::relu(Beta_output_true %*% t(Hidden_layer))
 Pred <- t(Pred)
 
 MAE = mean(abs(Y_vector - Pred))
-print(MAE)
+print(MAE)    # the error of 2.302467 is the same as before
