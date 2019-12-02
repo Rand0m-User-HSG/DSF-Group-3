@@ -358,10 +358,14 @@ for (i in 1:fold){
 MSE_boosting <- mean(MSE_boosting)
 MAE_boosting <- mean(MAE_boosting)
 print(MSE_boosting)
+# 0.1435487
 print(MAE_boosting)
+# 0.2906286
 MAE <- mean(abs(Y_vector - y_pred_boosting), na.rm = T)
 print(MAE)
+# 0.2906286
 sum(is.na(y_pred_boosting))
+# 7
 
 # No optimization: n.trees = 8996, interaction.depth = 5: 
 # MSE_boosting = 0.1398057
