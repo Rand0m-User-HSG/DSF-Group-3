@@ -306,11 +306,11 @@ optim_boosting<- function(depth, trees, X, Y){
 # while also modifying the intercation.depth
 
 possible_depth <- 1:5
-possible_trees <- 8990:9010
+possible_trees <- 8900:9100
 
 col = 0
 error <- matrix(NA, nrow = length(possible_trees), ncol = length(possible_depth))
-                
+
 for (k in possible_depth){
   col = col +1
   row = 0
@@ -322,19 +322,20 @@ for (k in possible_depth){
 
 best_parameters <- which(error == min(error), arr.ind = T)
 print(best_parameters)
-best_trees <- best_parameters[]
-best_depth <- best_parameters[]
+best_trees <- best_parameters[1]+8900 -1     # we have 8996 trees and
+best_depth <- best_parameters[2]             # a intercation depth of 5
 print(min(error))
 
 # We'll now run a 10-fol cv for boosting with the optimized parameters, so if you didn't optimize please run the following commented code:
-# best_trees = 3000
-# best_depth = 2
+ best_trees = 8996
+ best_depth = 5
 
 # we now run a 10-fold cv with the best parameters
 
 fold = 10
 MAE_boosting = rep(NA, fold)
 MSE_boosting = rep(NA, fold)
+y_pred_boosting <- rep(NA, length(Y_vector))
 
 for (i in 1:fold){
   
@@ -348,7 +349,7 @@ for (i in 1:fold){
   
   pred <- predict(model, X_test, n.trees = best_trees)
   
-  
+  y_pred_boosting[(1 + (i-1)*nrow(X_matrix)/fold) : (i*nrow(X_matrix)/fold)] <- pred
   MAE_boosting[i] <- mean(abs(Y_test - pred))
   MSE_boosting[i] = mean((Y_test - pred)^2)
   
@@ -358,11 +359,13 @@ MSE_boosting <- mean(MSE_boosting)
 MAE_boosting <- mean(MAE_boosting)
 print(MSE_boosting)
 print(MAE_boosting)
+MAE <- mean(abs(Y_vector - y_pred_boosting), na.rm = T)
+print(MAE)
+sum(is.na(y_pred_boosting))
 
-
-# No optimization: n.trees = 3000: 
-# MSE_boosting = 5.017046
-# MAE_boosting = 1.752591
+# No optimization: n.trees = 8996, interaction.depth = 5: 
+# MSE_boosting = 0.1398057
+# MAE_boosting = 0.2846745
 
 #### NEURAL NETWORK - Introduction ####
 
