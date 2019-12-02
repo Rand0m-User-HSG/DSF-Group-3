@@ -64,7 +64,7 @@ print(errors_lin_reg)
 
 fold_LOO = nrow(dataset_reg)
 betas_LOO_cv_lin_reg = matrix(0, nrow = ncol(dataset_reg), ncol = fold_LOO)
-pred = rep(0, fold_LOO)
+pred_lm = rep(0, fold_LOO)
 MSEs_lin_reg_LOO_cv = rep(0, fold_LOO)
 MAEs_lin_reg_LOO_cv = rep(0, fold_LOO)
 
@@ -85,11 +85,11 @@ for (i in 1:fold_LOO){
     mutate(intercept = 1) %>% # add an intercept column
     select(intercept, everything()) # place the intercept column right at the beginning
   
-  pred[i] = as.matrix(dataset_reg_cv_i) %*% betas_LOO_cv_lin_reg[, i]
+  pred_lm[i] = as.matrix(dataset_reg_cv_i) %*% betas_LOO_cv_lin_reg[, i]
   # we use dataset_reg_cv_non_i to calculate the betas, and test these betas on fold i (dataset_reg_cv_i)
   
-  MSEs_lin_reg_LOO_cv[i] = (y_vector_i - pred[i])^2
-  MAEs_lin_reg_LOO_cv[i] = abs(y_vector_i - pred[i])
+  MSEs_lin_reg_LOO_cv[i] = (y_vector_i - pred_lm[i])^2
+  MAEs_lin_reg_LOO_cv[i] = abs(y_vector_i - pred_lm[i])
   
 }
 
@@ -100,6 +100,12 @@ print(c(MSE_lin_reg_LOO_cv, MAE_lin_reg_LOO_cv))
 
 # MSE_lin_reg_LOO_cv = 9.514310 (MSE_lin_reg = 9.362024)
 # MAE_lin_reg_LOO_cv = 2.395987 (MAE_lin_reg = 2.37656)
+
+# let's round the predictions and measure the numebr of errors
+
+errors_lm <- length(which(Y_vector != round(pred_lm, 0)))/length(Y_vector)
+print(errors_lm)  # 0.8674491
+
 
 # Getting slightly higher MSE and MAE cross-validation errors is normal, because they
 # correspond to "testing" errors, unlike the errors from the previous section which were
@@ -140,7 +146,7 @@ print(errors_lin_reg_interaction)
 # We now compute testing errors by carrying out a leave-one-out (LOO) cross-validation
 
 fold_LOO = nrow(dataset_reg)
-pred = rep(0, fold_LOO)
+pred_lm_int = rep(0, fold_LOO)
 MSEs_lin_reg_LOO_cv_interaction = rep(0, fold_LOO)
 MAEs_lin_reg_LOO_cv_interaction = rep(0, fold_LOO)
 
@@ -159,11 +165,11 @@ for (i in 1:fold_LOO){
   dataset_reg_cv_i_with_pred = dataset_reg_cv_i %>%
     add_predictions(model_lin_reg_interaction_LOO_cv)
   
-  pred[i] = dataset_reg_cv_i_with_pred$pred
+  pred_lm_int[i] = dataset_reg_cv_i_with_pred$pred
   # we use dataset_reg_cv_non_i to calculate the betas, and test these betas on fold i (dataset_reg_cv_i)
   
-  MSEs_lin_reg_LOO_cv_interaction[i] = (y_vector_i - pred[i])^2
-  MAEs_lin_reg_LOO_cv_interaction[i] = abs(y_vector_i - pred[i])
+  MSEs_lin_reg_LOO_cv_interaction[i] = (y_vector_i - pred_lm_int[i])^2
+  MAEs_lin_reg_LOO_cv_interaction[i] = abs(y_vector_i - pred_lm_int[i])
   
 }
 
@@ -176,6 +182,11 @@ print(c(MSE_lin_reg_LOO_cv_interaction, MAE_lin_reg_LOO_cv_interaction))
 # MAE_lin_reg_LOO_cv_interaction =  2.392221 (MAE_lin_reg_LOO_cv = 2.395987)
 
 # Incorporating interaction effects slightly reduces MSE and MAE.
+
+# let's round the predictions and measure the number of errors
+
+errors_lm_int <- length(which(Y_vector != round(pred_lm_int, 0)))/length(Y_vector)
+print(errors_lm_int) # 0.8639972
 
 
 #### LASSO - Introduction ####
@@ -202,9 +213,14 @@ model_LASSO_LOO_cv$cvm[model_LASSO_LOO_cv$lambda == model_LASSO_LOO_cv$lambda.1s
 
 pred_lasso <- predict(model_LASSO_LOO_cv, X_matrix)
 MAE_lasso_cv <- mean(abs(Y_vector - pred_lasso))
-
 print(MAE_lasso_cv)
 # 2.42852
+
+# let's round the predictions and measure the numebr of errors
+
+errors_lasso <- length(which(Y_vector != round(pred_lasso, 0)))/length(Y_vector)
+print(errors_lasso) #0.8688298
+
 # Find the associated variables that survived variable selection
 variables_LASSO = coef(model_LASSO_LOO_cv, s="lambda.1se") %>% 
   broom:::tidy.dgCMatrix()
@@ -220,7 +236,7 @@ print(variables_LASSO)
 dataset_reg <- data.frame(cbind(Y_vector, X_matrix))
 fold_LOO = nrow(dataset_reg)
 betas_LOO_cv_LASSO_lin_reg = matrix(0, nrow = nrow(variables_LASSO), ncol = fold_LOO)
-pred = rep(0, fold_LOO)
+pred_lasso_lin = rep(0, fold_LOO)
 MSEs_LASSO_lin_reg_LOO_cv = rep(0, fold_LOO)
 MAEs_LASSO_lin_reg_LOO_cv = rep(0, fold_LOO)
 
@@ -247,11 +263,11 @@ for (i in 1:fold_LOO){
     mutate(intercept = 1) %>% # add an intercept column
     select(intercept, everything()) # place the intercept column right at the beginning
   
-  pred[i] = as.matrix(dataset_reg_cv_i) %*% betas_LOO_cv_LASSO_lin_reg[, i]
+  pred_lasso_lin[i] = as.matrix(dataset_reg_cv_i) %*% betas_LOO_cv_LASSO_lin_reg[, i]
   # we use dataset_reg_cv_non_i to calculate the betas, and test these betas on fold i (dataset_reg_cv_i)
   
-  MSEs_LASSO_lin_reg_LOO_cv[i] = (y_vector_i - pred[i])^2
-  MAEs_LASSO_lin_reg_LOO_cv[i] = abs(y_vector_i - pred[i])
+  MSEs_LASSO_lin_reg_LOO_cv[i] = (y_vector_i - pred_lasso_lin[i])^2
+  MAEs_LASSO_lin_reg_LOO_cv[i] = abs(y_vector_i - pred_lasso_lin[i])
   
 }
 
@@ -263,6 +279,10 @@ print(c(MSE_LASSO_lin_reg_LOO_cv, MAE_LASSO_lin_reg_LOO_cv))
 # MSE_LASSO_lin_reg_LOO_cv = 9.590648 (MSE_lin_reg_LOO_cv = 9.514310)
 # MAE_LASSO_lin_reg_LOO_cv = 2.404960 (MAE_lin_reg_LOO_cv = 2.395987)
 
+# let's round the predictions and measure the numebr of errors
+
+errors_lasso_lin <- length(which(Y_vector != round(pred_lasso_lin, 0)))/length(Y_vector)
+print(errors_lasso_lin) # 0.8671039
 
 
 #### BOOSTING - Introduction ####
@@ -305,7 +325,7 @@ optim_boosting<- function(depth, trees, X, Y){
 # It seems that around 9 000 we're gonna find the smallest error, so now we'll search for a range or +/- 100 around it,
 # while also modifying the intercation.depth
 
-possible_depth <- 1:5
+possible_depth <- 1:15
 possible_trees <- 8900:9100
 
 col = 0
@@ -328,7 +348,7 @@ print(min(error))
 
 # We'll now run a 10-fol cv for boosting with the optimized parameters, so if you didn't optimize please run the following commented code:
  best_trees = 8996
- best_depth = 5
+ best_depth = 10
 
 # we now run a 10-fold cv with the best parameters
 
@@ -345,7 +365,7 @@ for (i in 1:fold){
   Y_test <- as.double(Y_vector[(1 + (i-1)*nrow(X_matrix)/fold) : (i*nrow(X_matrix)/fold)])
   
   model <- gbm(Y_k ~., data = X_k, distribution = "gaussian", shrinkage = .1, n.trees = best_trees, 
-               interaction.depth = best_depth)
+               interaction.depth = 15)
   
   pred <- predict(model, X_test, n.trees = best_trees)
   
@@ -358,18 +378,68 @@ for (i in 1:fold){
 MSE_boosting <- mean(MSE_boosting)
 MAE_boosting <- mean(MAE_boosting)
 print(MSE_boosting)
-# 0.1435487
 print(MAE_boosting)
-# 0.2906286
-MAE <- mean(abs(Y_vector - y_pred_boosting), na.rm = T)
-print(MAE)
-# 0.2906286
-sum(is.na(y_pred_boosting))
-# 7
+# MSE_boosting = 0.001930676
+# MAE_boosting = 0.002223111
+
+sum(is.na(y_pred_boosting)) # for some reason the model produced 7 NA
+
+# by approximating the regressed values to integers we can consider them classes 
+# and also minimize the amounts of time we predict less accidents (similar to false negatives)!
+
+errors_boosting <- length(which(Y_vector != round(y_pred_boosting, 0)))/length(Y_vector)
+print(errors_boosting)  # 0.0003451847
+
+pred_more <- length(which(Y_vector != round(y_pred_boosting, 0) & Y_vector < round(y_pred_boosting, 0)))/length(Y_vector)
+print(pred_more)  # 0
+
+pred_less <- length(which(Y_vector != round(y_pred_boosting, 0) & Y_vector > round(y_pred_boosting, 0)))/length(Y_vector)
+print(pred_less)  # 0.0003451847
+
+# as we would prefer to predict more accidents than less, even at the cost of a somewhat increased error, 
+# we set some conditions for the rounding of the number of accidents:
+
+min_overshots <- function(rounding_line){
+  y_pred_rounded <- rep(NA, length(Y_vector))
+  for (i in 1:length(y_pred_boosting)){
+    
+    y_pred_rounded[i] <- ifelse(ceiling(y_pred_boosting[i]) - y_pred_boosting[i] > rounding_line, floor(y_pred_boosting[i]), ceiling(y_pred_boosting[i]))
+  }
+  
+  errors_rounded <- length(which(Y_vector != y_pred_rounded))/length(Y_vector)
+  
+  pred_more_rounded <- length(which(Y_vector != y_pred_rounded & Y_vector < y_pred_rounded))/length(Y_vector)
+  
+  pred_less_rounded <- length(which(Y_vector != y_pred_rounded & Y_vector > y_pred_rounded))/length(Y_vector)
+  
+  balanced_error <- pred_more_rounded*4 + pred_less_rounded
+  return(balanced_error)
+}
+
+best_rounding_line <- optimize(min_overshots, lower = .01, upper = .5, maximum = F)
+print(best_rounding_line)
+
+y_pred_rounded <- rep(NA, length(Y_vector))
+for (i in 1:length(y_pred_boosting)){
+  
+  y_pred_rounded[i] <- ifelse(ceiling(y_pred_boosting[i]) - y_pred_boosting[i] > 0.4999559, floor(y_pred_boosting[i]), ceiling(y_pred_boosting[i]))
+}
+
+errors_rounded <- length(which(Y_vector != y_pred_rounded))/length(Y_vector)
+print(errors_rounded)  # 0.0003451847
+
+pred_more_rounded <- length(which(Y_vector != y_pred_rounded & Y_vector < y_pred_rounded))/length(Y_vector)
+print(pred_more_rounded)  # 0
+
+pred_less_rounded <- length(which(Y_vector != y_pred_rounded & Y_vector > y_pred_rounded))/length(Y_vector)
+print(pred_less_rounded)  # 0.0003451847
+
+# We found our minimum error while also minimizing the times we wrongly predict less accidents happening!
+# To do so we had to assume the gravity of predicting less accidents was 4 times higher than predicting more!!
 
 # No optimization: n.trees = 8996, interaction.depth = 5: 
-# MSE_boosting = 0.1435487
-# MAE_boosting = 0.2906286
+# MSE_boosting = 0.1398057
+# MAE_boosting = 0.2846745
 
 #### NEURAL NETWORK - Introduction ####
 
@@ -469,6 +539,7 @@ print(errors) # this is our best MAE in a 10-fold CV, the epochs were 48 and the
 fold <- 10
 MAE_NN<- rep(NA, fold)
 MSE_NN <- rep(NA, fold)
+pred_NN <- rep(NA, length(Y_vector))
 
 for (i in 1:fold){
   
@@ -485,17 +556,13 @@ for (i in 1:fold){
     validation.split = 0,
     verbose =  1)
   
-  pred <- model %>% predict(X_test)
+  pred_NN[(1 + (i-1)*nrow(X_matrix)/fold) : (i*(nrow(X_matrix)/fold))] <- model %>% predict(X_test)
+  pred <- pred_NN[(1 + (i-1)*nrow(X_matrix)/fold) : (i*(nrow(X_matrix)/fold))]
   
   MSE_NN[i] <- mean((Y_test - pred)^2)
   MAE_NN[i] <- mean(abs(Y_test - pred))
   
 }
-
-MSE_NN <- mean(MSE_NN)
-MAE_NN <- mean(MAE_NN)
-print(MSE_NN)    # 9.71945
-print(MAE_NN)    # 2.444938
 
 #### NEURAL NETWORK - Model with the best epochs ####
 
@@ -509,9 +576,17 @@ training <- model %>% fit(
   validation.split = 0,
   verbose =  0)
 
-pred <- model %>% predict(X_matrix)
-MAE <- mean(abs(Y_vector - pred))
-print(MAE)  # MAE of 2.302467 
+pred_NN <- model %>% predict(X_matrix)
+
+MSE_NN <- mean((Y_vector - pred_NN)^2)
+MAE_NN <- mean(abs(Y_vector - pred_NN))
+print(MSE_NN)  # MSE of 8.674337
+print(MAE_NN)  # MAE of 2.302467 
+
+# let's round the predictions and measure the numebr of errors
+
+errors_NN <- length(which(Y_vector != round(pred_NN, 0)))/length(Y_vector)
+print(errors_NN)  # 0.8636521
 
 weights_reg <- model$get_weights()
 list.save(weights_reg, "Data/weights_reg.RData")
