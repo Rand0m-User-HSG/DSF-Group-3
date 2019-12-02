@@ -414,15 +414,15 @@ training <- model %>% fit(
 
 y_classified_NN<- 1 + model %>% predict_classes(X_matrix)
 error <- length(which(Y_vector != y_classified_NN))/length(Y_vector)
-print(error)
+print(error) #0.9130135
 
-weights_reg <- model$get_weights()
-list.save(weights_reg, "Data/weights_reg.RData")
+weights_class_n <- model$get_weights()
+list.save(weights_class_n, "Data/weights_class_n.RData")
 
 
 # here we use the weights of the model to predict with matrix multiplication
 
-load("./Data/weights_reg.RData")
+load("./Data/weights_class_n.RData")
 Beta <- x
 
 Beta_input <- Beta[[1]]
@@ -456,7 +456,7 @@ Pred <- t(Pred)
 Pred <- apply(Pred , 1, FUN=which.max)
 
 error_NN = cv_error_NN <- length(which(Y_vector != Pred))/length(Y_vector)
-print(error_NN)                                                           # the error are similar, they change a bit because of approximations
+print(error_NN)      # the error stays the same!
 
 #### We now quickly compare the results ####
 
