@@ -368,8 +368,8 @@ sum(is.na(y_pred_boosting))
 # 7
 
 # No optimization: n.trees = 8996, interaction.depth = 5: 
-# MSE_boosting = 0.1398057
-# MAE_boosting = 0.2846745
+# MSE_boosting = 0.1435487
+# MAE_boosting = 0.2906286
 
 #### NEURAL NETWORK - Introduction ####
 
