@@ -409,11 +409,11 @@ error <- length(which(Y_vector != y_classified_NN))/length(Y_vector)
 print(error)
 
 weights_reg <- model$get_weights()
-list.save(weights_reg, "Data/weights_reg.RData")
+list.save(weights_reg, "Data/weights_class.RData")
 
 # here we use the weights of the model to predict with matrix multiplication
 
-load("./Data/weights_reg.RData")
+load("./Data/weights_class.RData")
 Beta <- x
 
 Beta_input <- Beta[[1]]
@@ -450,8 +450,8 @@ Pred <- softmax(Beta_output_true %*% t(Hidden_layer))
 Pred <- t(Pred)
 Pred <- apply(Pred , 1, FUN=which.max)
 
-cv_error_NN = length(which(Y_vector != Pred))/length(Y_vector)
-print(cv_error_NN)                                                           # the error stays the same
+error_NN = length(which(Y_vector != Pred))/length(Y_vector)
+print(error_NN)                                                           # the error stays the same
 
 
 
